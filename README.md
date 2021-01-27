@@ -19,4 +19,4 @@ Windows-only image duplicate finder GUI. Optimized for batch processing and dele
 ![Screenshot2](https://cryshana.me/f/lyVBEkmbXiTq.png)
 
 Video:
-![Video](https://cryshana.me/f/8t7KvOEzRFyT.mp4)
+https://cryshana.me/f/MXGCRixn2Xv9.mp4
