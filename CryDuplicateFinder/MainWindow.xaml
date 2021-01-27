@@ -40,7 +40,7 @@
         <ListView Margin="4,73,135,10" Grid.Column="1" ItemsSource="{Binding SelectedFile.DuplicatesView.View, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown">
                         <Image Source="{Binding file.Path, Mode=OneWay}" Width="120" RenderOptions.BitmapScalingMode="HighQuality" />
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="{Binding file.Path, Mode=OneWay}" />
@@ -50,7 +50,7 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <Image Grid.Column="1" Source="{Binding SelectedFile.Path, Mode=OneWay}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"
+        <Image Grid.Column="1" Source="{Binding SelectedFile.Path, Mode=OneWay}" RenderOptions.BitmapScalingMode="HighQuality"
                Height="152" Margin="0,73,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120"/>
     </Grid>
 </Window>

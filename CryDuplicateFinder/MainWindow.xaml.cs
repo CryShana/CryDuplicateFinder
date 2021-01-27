@@ -3,9 +3,9 @@
 using FolderBrowserEx;
 
 using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-
 
 namespace CryDuplicateFinder
 {
@@ -46,6 +46,30 @@ namespace CryDuplicateFinder
             if (f == null) return;
 
             vm.SelectedFile = f;
+        }
+
+
+        DateTime lastMouseDown = DateTime.Now;
+        FileEntry.SimilarFileEntry lastItem = null;
+
+        private void StackPanel_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var now = DateTime.Now;
+            var elapsed = (now - lastMouseDown).TotalMilliseconds;
+            var item = (FileEntry.SimilarFileEntry)(sender as StackPanel).DataContext;
+
+            if (elapsed < 400 && lastItem == item)
+            {
+                var pinfo = new ProcessStartInfo
+                {
+                    FileName = item.file.Path,
+                    UseShellExecute = true
+                };
+                Process.Start(pinfo);
+            }
+
+            lastItem = item;
+            lastMouseDown = now;
         }
     }
 }
