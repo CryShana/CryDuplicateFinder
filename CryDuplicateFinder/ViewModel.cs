@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
 using System.IO;
-using System.Threading.Tasks;
 using System.Linq;
 using System.Windows;
-using CryDuplicateFinder.Algorithms;
-using System.Windows.Data;
 using System.Threading;
-using OpenCvSharp;
-using System.Drawing;
-using System.Windows.Media;
+using System.Windows.Data;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using CryDuplicateFinder.Algorithms;
+using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace CryDuplicateFinder
 {

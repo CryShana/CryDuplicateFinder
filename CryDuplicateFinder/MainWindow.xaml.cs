@@ -3,14 +3,13 @@
 using FolderBrowserEx;
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Timers;
 using System.Windows;
+using System.Diagnostics;
 using System.Windows.Controls;
+using System.Collections.Generic;
 using System.Windows.Media.Imaging;
 
 namespace CryDuplicateFinder
@@ -118,7 +117,7 @@ namespace CryDuplicateFinder
             }
         }
 
-        private void btnStart_Click(object sender, RoutedEventArgs e)
+        void btnStart_Click(object sender, RoutedEventArgs e)
         {
             var val = comboMode.SelectedItem as ComboBoxItem;
             var mode = (DuplicateCheckingMode)Enum.Parse(typeof(DuplicateCheckingMode), (string)val.Content);
@@ -126,7 +125,7 @@ namespace CryDuplicateFinder
             _ = vm.Start(mode);
         }
 
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var f = ((ListView)sender).SelectedItem as FileEntry;
             if (f == null) return;
@@ -137,7 +136,7 @@ namespace CryDuplicateFinder
 
         DateTime lastMouseDown = DateTime.Now;
         FileEntry.SimilarFileEntry lastItem = null;
-        private void StackPanel_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        void StackPanel_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var now = DateTime.Now;
             var elapsed = (now - lastMouseDown).TotalMilliseconds;
@@ -158,7 +157,7 @@ namespace CryDuplicateFinder
             lastMouseDown = now;
         }
 
-        private void DeleteLocalSimilarImages(object sender, RoutedEventArgs e)
+        void DeleteLocalSimilarImages(object sender, RoutedEventArgs e)
         {
             var selected = vm.SelectedFile;
             var minSimilarity = vm.MinSimilarity / 100.0;
@@ -185,7 +184,7 @@ namespace CryDuplicateFinder
             }
         }
 
-        private void DeleteGlobalSimilarImages(object sender, RoutedEventArgs e)
+        void DeleteGlobalSimilarImages(object sender, RoutedEventArgs e)
         {
             var minSimilarity = vm.MinSimilarity / 100.0;
 
@@ -212,9 +211,6 @@ namespace CryDuplicateFinder
             }*/
         }
 
-        private void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e)
-        {
-            vm.HideFilesWithoutDuplicates();
-        }
+        void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();   
     }
 }
