@@ -67,8 +67,8 @@ namespace CryDuplicateFinder
             // minimum similarity value to consider image as possible duplicate 
             double similarityThreshold = mode switch
             {
-                DuplicateCheckingMode.Histogram => 0.80,
-                DuplicateCheckingMode.Features => 0.66,
+                DuplicateCheckingMode.Histogram => 0.78,
+                DuplicateCheckingMode.Features => 0.65,
                 _ => throw new NotImplementedException()
             }; 
 

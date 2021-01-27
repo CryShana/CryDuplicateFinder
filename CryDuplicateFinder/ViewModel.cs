@@ -107,7 +107,6 @@ namespace CryDuplicateFinder
             if (csc != null)
             {
                 csc.Cancel();
-                csc = null;
                 return;
             }
 
@@ -165,6 +164,7 @@ namespace CryDuplicateFinder
             }
             finally
             {
+                csc = null;
                 Status = null;
                 IsBusy = false;
             }

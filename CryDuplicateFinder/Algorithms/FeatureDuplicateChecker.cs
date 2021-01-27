@@ -11,7 +11,7 @@ namespace CryDuplicateFinder.Algorithms
         static ConcurrentDictionary<string, Mat> cache = new();
 
         Mat img;
-        const int MaxDimension = 400;
+        const int MaxDimension = 250;
 
         public double CalculateSimiliarityTo(string image)
         {
@@ -28,7 +28,9 @@ namespace CryDuplicateFinder.Algorithms
 
                     descriptors2 = new Mat();
                     orb.DetectAndCompute(img2, null, out KeyPoint[] imgKeypoints2, descriptors2);
-                    cache.TryAdd(image, descriptors2);
+
+                    // cache it if there is space
+                    if (cache.Count < MaxCacheCapacity) cache.TryAdd(image, descriptors2);
                 }
             }
 

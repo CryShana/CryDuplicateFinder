@@ -14,7 +14,7 @@ namespace CryDuplicateFinder.Algorithms
         static ConcurrentDictionary<string, (int[] r, int[] g, int[] b, int pixels)> cache = new();
 
         Mat img;
-        const int MaxDimension = 300;
+        const int MaxDimension = 150;
 
         public double CalculateSimiliarityTo(string image)
         {        
