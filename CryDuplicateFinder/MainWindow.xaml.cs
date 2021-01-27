@@ -32,7 +32,7 @@ namespace CryDuplicateFinder
 
         private void Vm_SelectedFileChanged(object sender, FileEntry e)
         {
-            if (e == null)
+            if (e == null || !File.Exists(e.Path))
             {
                 selectedImage.Source = null;
                 return;
