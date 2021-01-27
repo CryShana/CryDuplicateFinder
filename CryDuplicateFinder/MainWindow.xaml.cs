@@ -64,7 +64,7 @@ namespace CryDuplicateFinder
             {
                 var first = vm.Files.First();
                 var last = vm.Files.Last();
-                var elapsed = (last.FinishedAnalysis - first.StartedAnalysis).Value.TotalMilliseconds;  
+                var elapsed = (last.FinishedAnalysis - first.StartedAnalysis).Value.TotalMilliseconds;
                 vm.SpeedStatus = $"Finished (Elapsed: {getTimeText(elapsed)})";
             }
             else if (vm.IsBusy && vm.Files.Count > 1 && vm.ProgressValue == 0)
@@ -172,23 +172,17 @@ namespace CryDuplicateFinder
             if (MessageBox.Show($"This will delete all similar images to '{Path.GetFileName(selected.Path)}' that have similarity above {vm.MinSimilarity}%\n\n" +
                 $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
-            // delete local images (duplicates for this selected file)
-            var toDelete = new List<FileEntry.SimilarFileEntry>();
-            foreach (var f in selected.Duplicates)
-            {
-                if (f.similarity < minSimilarity) continue;
-                toDelete.Add(f);
-            }
-
-            foreach (var f in toDelete)
+            ProcessLocalDuplicates(minSimilarity, selected, f =>
             {
                 if (File.Exists(f.file.Path)) File.Delete(f.file.Path);
 
                 vm.Files.Remove(f.file);
-                selected.Duplicates.Remove(f);
+                foreach (var ff in vm.Files)
+                    if (ff.Duplicates.Remove(f)) 
+                        ff.DuplicatesView.View.Refresh();
 
-                vm.FilesView.View.Refresh(); // CHECK: for some reason this view needs to be refreshed manually - but the SelectedFiles view does it automatically
-            }
+                vm.FilesView.View.Refresh(); 
+            });
         }
 
         void DeleteGlobalSimilarImages(object sender, RoutedEventArgs e)
@@ -199,25 +193,90 @@ namespace CryDuplicateFinder
                 $"Files with higher resolution will be prioritized.\n\n" +
                 $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
-            // TODO: delete global images (prioritize higher resolutions)
-            /*var toDelete = new List<FileEntry.SimilarFileEntry>();
-            foreach (var f in vm.Files)
+            vm.SelectedFile = null;
+
+            // delete all images (go through all files, retain the highest resolution duplicate, delete others)
+            ProcessGlobalDuplicates(minSimilarity, f =>
             {
-                if (f.similarity < minSimilarity) continue;
-                toDelete.Add(f);
-            }
+                try
+                {
+                    if (File.Exists(f.Path)) File.Delete(f.Path);
 
-            foreach (var f in toDelete)
-            {
-                if (File.Exists(f.file.Path)) File.Delete(f.file.Path);
+                    vm.Files.Remove(f);
+                    foreach (var ff in vm.Files)
+                        for (int i = 0; i < ff.Duplicates.Count; i++)
+                        {
+                            if (ff.Duplicates[i].file == f)
+                            {
+                                ff.Duplicates.RemoveAt(i);
+                                i--;
+                            }
+                            ff.DuplicatesView.View.Refresh();
+                        }
 
-                vm.Files.Remove(f.file);
-                selected.Duplicates.Remove(f);
-
-                vm.FilesView.View.Refresh();
-            }*/
+                    vm.FilesView.View.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    // TODO: log
+                }
+            });
         }
 
-        void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();   
+        void ProcessLocalDuplicates(double minSimilarity, FileEntry selected, Action<FileEntry.SimilarFileEntry> action)
+        {
+            var affected = new List<FileEntry.SimilarFileEntry>();
+            foreach (var f in selected.Duplicates)
+            {
+                if (f.similarity < minSimilarity) continue;
+                affected.Add(f);
+            }
+
+            foreach (var f in affected) action(f);
+        }
+
+        void ProcessGlobalDuplicates(double minSimilarity, Action<FileEntry> action)
+        {
+            var inAffected = new HashSet<FileEntry>();
+            var affected = new List<FileEntry>();
+
+            foreach (var f in vm.Files)
+            {
+                if (f.Duplicates.Count == 0) continue;
+                if (inAffected.Contains(f)) continue;
+                _ = f.Resolution;
+
+                var gottaCheck = new List<FileEntry.SimilarFileEntry>() { new(f, 1, "", 0) };
+                foreach (var ff in f.Duplicates)
+                {
+                    if (ff.similarity < minSimilarity) continue;
+
+                    // now select the highest res file
+                    _ = ff.file.Resolution;
+                    ff.file.GetResolutionTask().Wait();
+
+                    gottaCheck.Add(ff);
+                }
+
+                if (gottaCheck.Count > 0)
+                {
+                    // sort by highest resolution
+                    gottaCheck.Sort((a, b) => (b.file.Width * b.file.Height).CompareTo((a.file.Width * a.file.Height)));
+
+                    for (int i = 1; i < gottaCheck.Count; i++)
+                    {
+                        var fl = gottaCheck[i].file;
+                        if (inAffected.Contains(fl)) continue;
+
+                        affected.Add(fl);
+                        inAffected.Add(fl);
+                    }
+                }
+            }
+
+            foreach (var f in affected) action(f);
+        }
+
+        void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();
     }
 }

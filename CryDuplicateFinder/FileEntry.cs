@@ -50,6 +50,8 @@ namespace CryDuplicateFinder
         public DateTime? StartedAnalysis { get; private set; }
         public DateTime? FinishedAnalysis { get; private set; }
 
+        public int Width { get; private set; }
+        public int Height { get; private set; }
         public string Resolution
         {
             get
@@ -70,6 +72,8 @@ namespace CryDuplicateFinder
         }
 
         bool resRequest = false;
+        TaskCompletionSource resolutionTask = new();
+        public Task GetResolutionTask() => resolutionTask.Task;
         Task getResolution()
         {
             if (resRequest) return Task.CompletedTask;
@@ -78,7 +82,13 @@ namespace CryDuplicateFinder
             return Task.Run(() =>
             {
                 if (!File.Exists(Path)) Resolution = "Missing image";
-                using (var mat = CvHelpers.OpenImage(Path)) Resolution = $"{mat.Width}x{mat.Height}";
+                using (var mat = CvHelpers.OpenImage(Path))
+                {
+                    Width = mat.Width;
+                    Height = mat.Height;
+                    Resolution = $"{mat.Width}x{mat.Height}";
+                    resolutionTask.SetResult();
+                }
             });
         }
 
@@ -184,6 +194,8 @@ namespace CryDuplicateFinder
             if (f.Duplicates == null) f.Duplicates = new();
             f.Duplicates.Add(new(this, similarity, $"{(similarity * 100):0.00}%", elapsedMs));
         }
+
+        public override string ToString() => Path;
 
         public event PropertyChangedEventHandler PropertyChanged;
         void Changed([CallerMemberName] string name = "")
