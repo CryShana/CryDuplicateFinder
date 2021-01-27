@@ -11,6 +11,7 @@ namespace CryDuplicateFinder.Algorithms
         static ConcurrentDictionary<string, Mat> cache = new();
 
         Mat img;
+        string original;
         const int MaxDimension = 250;
 
         public double CalculateSimiliarityTo(string image)
@@ -31,6 +32,22 @@ namespace CryDuplicateFinder.Algorithms
 
                     // cache it if there is space
                     if (cache.Count < MaxCacheCapacity) cache.TryAdd(image, descriptors2);
+
+                    /*
+                    // FOR DEBUGGING
+                    var matcher2 = new BFMatcher(NormTypes.Hamming, true);
+                    var matches2 = matcher2.Match(descriptors, descriptors2);
+
+                    var or = original;
+                    var to = image;
+                    var mean2 = matches2.Average(x => x.Distance);
+                    var count = matches2.Count(x => x.Distance < mean2) / (double)matches2.Length;
+
+                    using var outimg = new Mat();
+                    Cv2.DrawMatches(img, imgKeypoints, GetImage(image), imgKeypoints2, matches2, outimg);
+                    Cv2.PutText(outimg, $"Mean: {mean2}, Fac: {count}", new(0, outimg.Height), HersheyFonts.HersheyPlain, 1, Scalar.Red, 1);
+                    Cv2.ImShow("i", outimg); Cv2.WaitKey(); Cv2.DestroyAllWindows();
+                    */
                 }
             }
 
@@ -65,7 +82,11 @@ namespace CryDuplicateFinder.Algorithms
             return target;
         }
 
-        public void LoadImage(string image) => img = GetImage(image);
+        public void LoadImage(string image)
+        {
+            original = image;
+            img = GetImage(image);
+        }
 
         Mat GetImage(string image)
         {
@@ -84,6 +105,6 @@ namespace CryDuplicateFinder.Algorithms
             cache.Clear();
         }
 
-        public double GetMinRequiredSimilarity() => 0.63;
+        public double GetMinRequiredSimilarity() => 0.5;
     }
 }
