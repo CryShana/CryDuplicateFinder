@@ -37,7 +37,8 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <ListView Margin="4,73,166,10" Grid.Column="1" ItemsSource="{Binding SelectedFile.DuplicatesView.View, Mode=OneWay}">
+        <ListView Margin="4,73,166,10" Grid.Column="1" ItemsSource="{Binding SelectedFile.DuplicatesView.View, Mode=OneWay}"
+                  ScrollViewer.CanContentScroll="False">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown">
