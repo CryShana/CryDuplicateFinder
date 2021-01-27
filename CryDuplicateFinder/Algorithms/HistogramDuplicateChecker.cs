@@ -2,11 +2,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CryDuplicateFinder.Algorithms
 {
@@ -15,11 +10,11 @@ namespace CryDuplicateFinder.Algorithms
     /// </summary>
     public class HistogramDuplicateChecker : IDuplicateChecker
     {
-        static int MaxCacheCapacity = 200_000;
+        static int MaxCacheCapacity = 300_000;
         static ConcurrentDictionary<string, (int[] r, int[] g, int[] b, int pixels)> cache = new();
 
         Mat img;
-        const int MaxDimension = 700;
+        const int MaxDimension = 400;
 
         public double CalculateSimiliarityTo(string image)
         {        
