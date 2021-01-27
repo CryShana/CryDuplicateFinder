@@ -12,7 +12,7 @@
             <ColumnDefinition Width="184*"/>
         </Grid.ColumnDefinitions>
         <Button x:Name="btnRootDir" IsEnabled="{Binding SelectionReady, Mode=OneWay}" Content="Select directory" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="129" Height="22" Click="btnRootDir_Click"/>
-        <TextBlock Margin="144,13,190,0" Text="{Binding RootDirectory, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <TextBlock Margin="144,13,332,0" Text="{Binding RootDirectory, Mode=OneWay}" TextWrapping="NoWrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
         <ProgressBar Value="{Binding ProgressValue, Mode=OneWay}" Maximum="{Binding ProgressMax, Mode=OneWay}" Minimum="0" Height="10" Margin="10,37,10,0" VerticalAlignment="Top" Foreground="#FF29A6EE" Grid.ColumnSpan="2"/>
         <TextBlock Margin="10,52,302,0" Text="{Binding Status, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
         <Button x:Name="btnStart" Content="{Binding StartButtonText, Mode=OneWay}" IsEnabled="{Binding StartReady, Mode=OneWay}" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="78" Height="22" Click="btnStart_Click" Grid.Column="1"/>
@@ -58,5 +58,7 @@
         <TextBlock Grid.Column="1" HorizontalAlignment="Right" Margin="0,274,59,0" Text="Min. similarity:" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <Button Click="DeleteGlobalSimilarImages" IsEnabled="{Binding CanDeleteGlobal, Mode=OneWay}" Content="Delete all similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="151" Height="20"/>
         <Button Click="HideImagesWithoutDuplicates" IsEnabled="{Binding CanHide, Mode=OneWay}" Content="Hide images without duplicates" Margin="10,0,4,13" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Column="1" HorizontalAlignment="Right" IsTabStop="False" Margin="0,12,194,0" Text="{Binding MaxThreads, Mode=TwoWay}" TextWrapping="Wrap" VerticalAlignment="Top" Width="44"/>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Right" Margin="0,13,242,0" Text="Max. threads:" TextWrapping="Wrap" VerticalAlignment="Top"/>
     </Grid>
 </Window>

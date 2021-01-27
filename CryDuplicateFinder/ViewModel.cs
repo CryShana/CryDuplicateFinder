@@ -21,7 +21,7 @@ namespace CryDuplicateFinder
         ObservableCollection<FileEntry> files = new();
         bool startReady = false, selectionReady = true, busy = false, hiding = true;
         string rootdir = null, status = null, speedStatus = null;
-        int prgMax = 100, prgVal = 0;
+        int prgMax = 100, prgVal = 0, mxThreads = 16;
         double minSimilarity = 90;
 
         public string RootDirectory
@@ -60,6 +60,15 @@ namespace CryDuplicateFinder
                 minSimilarity = value;
                 if (minSimilarity > 100) minSimilarity = 100;
                 else if (minSimilarity < 0) minSimilarity = 0;
+                Changed();
+            }
+        }
+        public int MaxThreads
+        {
+            get => mxThreads; set
+            {
+                mxThreads = value;
+                if (MaxThreads < 1) MaxThreads = 1;
                 Changed();
             }
         }
@@ -107,7 +116,7 @@ namespace CryDuplicateFinder
             IsHiding = false;
             SelectedFile = null;
             Status = "Starting...";
-            
+
             try
             {
                 var token = csc.Token;
@@ -128,13 +137,13 @@ namespace CryDuplicateFinder
                 foreach (var f in Files)
                 {
                     if (token.IsCancellationRequested) break;
-                    
+
                     try
                     {
                         var fname = Path.GetFileNameWithoutExtension(f.Path);
                         Status = $"[{ProgressValue + 1}/{ProgressMax}] Finding duplicates for '{fname}'";
 
-                        await FindDuplicates(f, mode, token);
+                        await FindDuplicates(f, mode, MaxThreads, token);
 
                         // give GUI time to catch up
                         await Task.Delay(10);
@@ -202,12 +211,12 @@ namespace CryDuplicateFinder
             });
         }
 
-        Task FindDuplicates(FileEntry file, DuplicateCheckingMode mode, CancellationToken token) => file.CheckForDuplicates(Files, mode, token);
+        Task FindDuplicates(FileEntry file, DuplicateCheckingMode mode, int maxThreads, CancellationToken token) => file.CheckForDuplicates(Files, mode, maxThreads, token);
 
         public void HideFilesWithoutDuplicates()
         {
             if (IsHiding || Files == null || FilesView == null) return;
-            
+
             if (FilesView.View.Filter == null)
             {
                 FilesView.View.Filter = (a) =>
@@ -223,7 +232,7 @@ namespace CryDuplicateFinder
                     }
                 };
             }
-            else FilesView.View.Refresh();                   
+            else FilesView.View.Refresh();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

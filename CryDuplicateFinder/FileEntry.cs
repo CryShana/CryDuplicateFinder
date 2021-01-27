@@ -60,7 +60,7 @@ namespace CryDuplicateFinder
             DuplicatesView.SortDescriptions.Add(new SortDescription(nameof(SimilarFileEntry.similarity), ListSortDirection.Descending));
         }
 
-        public Task CheckForDuplicates(IEnumerable<FileEntry> files, DuplicateCheckingMode mode, CancellationToken token)
+        public Task CheckForDuplicates(IEnumerable<FileEntry> files, DuplicateCheckingMode mode, int maxThreads, CancellationToken token)
         {
             StartedAnalysis = DateTime.Now;
 
@@ -95,7 +95,7 @@ namespace CryDuplicateFinder
 
                 try
                 {
-                    Parallel.ForEach(files, f =>
+                    Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = maxThreads }, f =>
                     {
                         // ignore same file or file already part of duplicates
                         if (f == this || token.IsCancellationRequested) return;
