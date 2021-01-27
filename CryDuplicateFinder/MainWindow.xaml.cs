@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Windows.Media.Imaging;
+using Microsoft.Win32;
+using System.Text.Json;
 
 namespace CryDuplicateFinder
 {
@@ -410,7 +412,7 @@ namespace CryDuplicateFinder
             RemoveFile(f);
         }
 
-        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (vm.FilesView == null || vm.Files.Count == 0) return;
 
@@ -428,6 +430,31 @@ namespace CryDuplicateFinder
                 if (f.Path.ToLower().Contains(txt)) return true;
                 return false;
             };
+        }
+
+        void ExportToJson(object sender, RoutedEventArgs e)
+        {
+            var dialog = new SaveFileDialog();
+            dialog.Filter = "JSON file|*.json";
+            if (dialog.ShowDialog() != true) return;
+
+            var file = dialog.FileName;
+
+            var toExport = vm.Files.Where(x => x.Duplicates != null && x.Duplicates.Count > 0 && x.FilesChecked == x.FilesToCheck)
+                .Select(x => new
+                {
+                    File = x.Path,
+                    Width = x.Width,
+                    Height = x.Height,
+                    Duplicates = x.Duplicates.Select(y => new
+                    {
+                        File = y.file.Path,
+                        Similarity = y.similarity
+                    })
+                });
+
+            var txt = JsonSerializer.Serialize(toExport);
+            File.WriteAllText(file, txt);
         }
     }
 }

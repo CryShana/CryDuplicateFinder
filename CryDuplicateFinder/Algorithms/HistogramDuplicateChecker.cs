@@ -17,7 +17,7 @@ namespace CryDuplicateFinder.Algorithms
         string original;
         const int MaxDimension = 100;
 
-        public double CalculateSimiliarityTo(string image)
+        public double CalculateSimiliarityTo(FileEntry file)
         {
             const int histogramGroups = 16;
 
@@ -28,10 +28,10 @@ namespace CryDuplicateFinder.Algorithms
                 h1.pixels = img.Width * img.Height;
             }
 
-            var isCached2 = cache.TryGetValue(image, out var h2);
+            var isCached2 = cache.TryGetValue(file.Path, out var h2);
             if (!isCached2)
             {
-                using var img2 = GetImage(image);
+                using var img2 = GetImage(file);
                 (h2.b, h2.g, h2.r) = GetHistogramGroups(img2, histogramGroups);
                 h2.pixels = img2.Width * img2.Height;
             }
@@ -44,7 +44,7 @@ namespace CryDuplicateFinder.Algorithms
 
             // cache it if there is space
             if (!isCached1 && cache.Count < MaxCacheCapacity) cache.TryAdd(original, h1);
-            if (!isCached2 && cache.Count < MaxCacheCapacity) cache.TryAdd(image, h2);
+            if (!isCached2 && cache.Count < MaxCacheCapacity) cache.TryAdd(file.Path, h2);
 
             return Math.Max(sim1, sim2);
         }
@@ -101,17 +101,21 @@ namespace CryDuplicateFinder.Algorithms
             return similarity;
         }
 
-        public void LoadImage(string image)
+        public void LoadImage(FileEntry file)
         {
-            original = image;
+            original = file.Path;
 
-            var isCached = cache.TryGetValue(image, out _);
-            if (!isCached) img = GetImage(image);
+            var isCached = cache.TryGetValue(original, out _);
+            if (!isCached) img = GetImage(file);
+
         }
 
-        Mat GetImage(string image)
+        Mat GetImage(FileEntry file)
         {
-            var m = CvHelpers.OpenImage(image, ImreadModes.Color);
+            var m = CvHelpers.OpenImage(file.Path, ImreadModes.Grayscale);
+
+            file.Width = m.Width;
+            file.Height = m.Height;
             CvHelpers.Limit(m, m, MaxDimension);
             return m;
         }
@@ -127,5 +131,7 @@ namespace CryDuplicateFinder.Algorithms
         }
 
         public double GetMinRequiredSimilarity() => 0.87;
+
+        public Mat GetLoadedImage() => img;
     }
 }

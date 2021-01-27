@@ -109,7 +109,7 @@ namespace CryDuplicateFinder
             }
         }
         public bool CanDeleteLocal => SelectedFile != null && SelectedFile.FinishedAnalysis != null && !IsBusy;
-        public bool CanDeleteGlobal => !IsBusy;
+        public bool CanDeleteGlobal => !IsBusy && Files.Count > 0;
 
         public bool IsHiding { get => hiding; private set { hiding = value; Changed(); Changed(nameof(CanHide)); } }
         public bool CanHide => !IsHiding && ProgressValue > 1;

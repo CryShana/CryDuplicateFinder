@@ -17,9 +17,9 @@ namespace CryDuplicateFinder.Algorithms
         string original;
         const int MaxDimension = 300;
 
-        public double CalculateSimiliarityTo(string image)
+        public double CalculateSimiliarityTo(FileEntry file)
         {
-            var isCached = cache.TryGetValue(image, out Mat descriptors2);
+            var isCached = cache.TryGetValue(file.Path, out Mat descriptors2);
             var isCachedOriginal = cache.TryGetValue(original, out Mat dstp);
             Mat descriptors = null;
 
@@ -47,11 +47,11 @@ namespace CryDuplicateFinder.Algorithms
                 // check if target image is cached
                 if (!isCached)
                 {
-                    using var img2 = GetImage(image);
+                    using var img2 = GetImage(file);
 
                     descriptors2 = new Mat();
                     orb.DetectAndCompute(img2, null, out _, descriptors2);
-                    if (cache.Count < MaxCacheCapacity) cache.TryAdd(image, descriptors2);
+                    if (cache.Count < MaxCacheCapacity) cache.TryAdd(file.Path, descriptors2);
                 }
             }
 
@@ -70,10 +70,10 @@ namespace CryDuplicateFinder.Algorithms
                 h1.pixels = img.Width * img.Height;
             }
 
-            var isCached2H = cacheHistograms.TryGetValue(image, out var h2);
+            var isCached2H = cacheHistograms.TryGetValue(file.Path, out var h2);
             if (!isCached2H)
             {
-                using var img2 = GetImage(image);
+                using var img2 = GetImage(file);
                 (h2.b, h2.g, h2.r) = HistogramDuplicateChecker.GetHistogramGroups(img2, histogramGroups);
                 h2.pixels = img2.Width * img2.Height;
             }
@@ -87,7 +87,7 @@ namespace CryDuplicateFinder.Algorithms
 
             // cache it if there is space
             if (!isCached1H && cacheHistograms.Count < MaxCacheCapacity) cacheHistograms.TryAdd(original, h1);
-            if (!isCached2H && cacheHistograms.Count < MaxCacheCapacity) cacheHistograms.TryAdd(image, h2);
+            if (!isCached2H && cacheHistograms.Count < MaxCacheCapacity) cacheHistograms.TryAdd(file.Path, h2);
 
             // MAPPING
             // 0... 100% similarity
@@ -120,17 +120,21 @@ namespace CryDuplicateFinder.Algorithms
             return target;
         }
 
-        public void LoadImage(string image)
+        public void LoadImage(FileEntry file)
         {
-            original = image;
-
+            original = file.Path;
+           
             var isCached = cache.TryGetValue(original, out _);
-            if (!isCached) img = GetImage(image);
+            if (!isCached) img = GetImage(file);
+            
         }
 
-        Mat GetImage(string image)
+        Mat GetImage(FileEntry file)
         {
-            var m = CvHelpers.OpenImage(image, ImreadModes.Grayscale);
+            var m = CvHelpers.OpenImage(file.Path, ImreadModes.Grayscale);
+
+            file.Width = m.Width;
+            file.Height = m.Height;
             CvHelpers.Limit(m, m, MaxDimension);
             return m;
         }
@@ -145,6 +149,8 @@ namespace CryDuplicateFinder.Algorithms
         {
             cache.Clear();
         }
+
+        public Mat GetLoadedImage() => img;
 
         public double GetMinRequiredSimilarity() => 0.64;
     }

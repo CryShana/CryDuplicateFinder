@@ -7,18 +7,29 @@ namespace CryDuplicateFinder.Algorithms
     public class TemplateDuplicateChecker : IDuplicateChecker
     {
         Mat img;
+        string original;
         const int MaxDimension = 700;
 
-        public double CalculateSimiliarityTo(string image)
+        public double CalculateSimiliarityTo(FileEntry file)
         {
             throw new NotImplementedException();
         }
 
-        public void LoadImage(string image) => img = GetImage(image);
-
-        Mat GetImage(string image)
+        public void LoadImage(FileEntry file)
         {
-            var m = new Mat(image);
+            original = file.Path;
+
+            //var isCached = cache.TryGetValue(original, out _);
+            //if (!isCached) img = GetImage(file);
+            img = GetImage(file);
+        }
+
+        Mat GetImage(FileEntry file)
+        {
+            var m = CvHelpers.OpenImage(file.Path, ImreadModes.Grayscale);
+
+            file.Width = m.Width;
+            file.Height = m.Height;
             CvHelpers.Limit(m, m, MaxDimension);
             return m;
         }
@@ -27,6 +38,8 @@ namespace CryDuplicateFinder.Algorithms
         {
             img?.Dispose();
         }
+
+        public Mat GetLoadedImage() => img;
 
         public double GetMinRequiredSimilarity() => 0.5;
     }
