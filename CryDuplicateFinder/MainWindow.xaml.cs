@@ -3,6 +3,7 @@
 using FolderBrowserEx;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -139,15 +140,36 @@ namespace CryDuplicateFinder
 
         private void DeleteLocalSimilarImages(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show($"This will delete all similar images to '{Path.GetFileName(vm.SelectedFile.Path)}' that have similarity below {vm.MinSimilarity}%\n\n" +
+            var selected = vm.SelectedFile;
+            var minSimilarity = vm.MinSimilarity / 100.0;
+
+            if (MessageBox.Show($"This will delete all similar images to '{Path.GetFileName(selected.Path)}' that have similarity above {vm.MinSimilarity}%\n\n" +
                 $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
-            // TODO: delete local images
+            // delete local images (duplicates for this selected file)
+            var toDelete = new List<FileEntry.SimilarFileEntry>();
+            foreach (var f in selected.Duplicates)
+            {
+                if (f.similarity < minSimilarity) continue;
+                toDelete.Add(f);
+            }
+
+            foreach (var f in toDelete)
+            {
+                if (File.Exists(f.file.Path)) File.Delete(f.file.Path);
+
+                vm.Files.Remove(f.file);
+                selected.Duplicates.Remove(f);
+
+                vm.FilesView.View.Refresh();
+            }
         }
 
         private void DeleteGlobalSimilarImages(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show($"This will delete all similar images to all files that have similarity below {vm.MinSimilarity}%. " +
+            var minSimilarity = vm.MinSimilarity / 100.0;
+
+            if (MessageBox.Show($"This will delete all similar images to all files that have similarity above {vm.MinSimilarity}%. " +
                 $"Files with higher resolution will be prioritized.\n\n" +
                 $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 

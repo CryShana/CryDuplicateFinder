@@ -63,15 +63,6 @@ namespace CryDuplicateFinder
         public Task CheckForDuplicates(IEnumerable<FileEntry> files, DuplicateCheckingMode mode, int maxThreads, CancellationToken token)
         {
             StartedAnalysis = DateTime.Now;
-
-            // minimum similarity value to consider image as possible duplicate 
-            double similarityThreshold = mode switch
-            {
-                DuplicateCheckingMode.Histogram => 0.78,
-                DuplicateCheckingMode.Features => 0.65,
-                _ => throw new NotImplementedException()
-            }; 
-
             filesToCheck = files.Count() - 1;
 
             // in case there are no files to check, just mark as completed
@@ -92,6 +83,8 @@ namespace CryDuplicateFinder
             {  
                 var checker = GetDuplicateChecker(mode);
                 checker.LoadImage(Path);
+
+                var minSim = checker.GetMinRequiredSimilarity();
 
                 try
                 {
@@ -116,7 +109,7 @@ namespace CryDuplicateFinder
                         {
                             // get similarity
                             similarity = checker.CalculateSimiliarityTo(f.Path);
-                            isDuplicate = similarity >= similarityThreshold;                             
+                            isDuplicate = similarity >= minSim;                             
                         }
                         catch (Exception ex)
                         {
