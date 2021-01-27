@@ -70,7 +70,7 @@ namespace CryDuplicateFinder
                 var remainingFiles = vm.ProgressMax - vm.ProgressValue;
                 etaMs = averageFileCheckMs * remainingFiles;
 
-                vm.SpeedStatus = $"[{getTimeText(averageFileCheckMs)}] ETA: {getTimeText(etaMs)}";
+                vm.SpeedStatus = $"[{getTimeText(averageFileCheckMs)}/image] ETA: {getTimeText(etaMs)}";
             }
 
             string getTimeText(double ms)
@@ -79,7 +79,8 @@ namespace CryDuplicateFinder
                 {
                     < 1000 => Math.Round(ms).ToString() + "ms",
                     <= 60 * 1000 => (ms / 1000).ToString("0.0") + "sec",
-                    _ => ((ms / 1000) / 60).ToString("0.0") + "min"
+                    <= 60 * 60 * 1000 => ((ms / 1000) / 60).ToString("0.0") + "min",
+                    _ => (((ms / 1000) / 60) / 60).ToString("0.0") + "h"
                 };
             }
         }
@@ -151,6 +152,11 @@ namespace CryDuplicateFinder
                 $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
             // TODO: delete global images (prioritize higher resolutions)
+        }
+
+        private void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e)
+        {
+            vm.HideFilesWithoutDuplicates();
         }
     }
 }

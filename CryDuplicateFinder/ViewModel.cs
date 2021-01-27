@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Windows;
 using CryDuplicateFinder.Algorithms;
+using System.Windows.Data;
+using System.Threading;
 
 namespace CryDuplicateFinder
 {
@@ -15,8 +17,9 @@ namespace CryDuplicateFinder
     {
         FileEntry selectedFile = null;
 
+        CollectionViewSource fview;
         ObservableCollection<FileEntry> files = new();
-        bool startReady = false, selectionReady = true, busy = false;
+        bool startReady = false, selectionReady = true, busy = false, hiding = true;
         string rootdir = null, status = null, speedStatus = null;
         int prgMax = 100, prgVal = 0;
         double minSimilarity = 90;
@@ -34,10 +37,20 @@ namespace CryDuplicateFinder
         }
 
         public int ProgressMax { get => prgMax; set { prgMax = value; Changed(); } }
-        public int ProgressValue { get => prgVal; set { prgVal = value; Changed(); Changed(nameof(CanDeleteGlobal)); } }
+        public int ProgressValue { get => prgVal; set { prgVal = value; Changed(); Changed(nameof(CanDeleteGlobal)); Changed(nameof(CanHide)); } }
         public string Status { get => status ?? "Idle"; set { status = value; Changed(); } }
         public string SpeedStatus { get => speedStatus ?? "Waiting to start"; set { speedStatus = value; Changed(); } }
-        public ObservableCollection<FileEntry> Files { get => files; set { files = value; Changed(); } }
+        public ObservableCollection<FileEntry> Files
+        {
+            get => files; set
+            {
+                files = value; Changed();
+                FilesView = new();
+                FilesView.Source = files;
+                Changed(nameof(FilesView));
+            }
+        }
+        public CollectionViewSource FilesView { get => fview; set { fview = value; Changed(); } }
 
         public double MinSimilarity
         {
@@ -70,6 +83,9 @@ namespace CryDuplicateFinder
         public bool CanDeleteLocal => SelectedFile != null && SelectedFile.FinishedAnalysis != null;
         public bool CanDeleteGlobal => ProgressValue == ProgressMax;
 
+        public bool IsHiding { get => hiding; private set { hiding = value; Changed(); Changed(nameof(CanHide)); } }
+        public bool CanHide => !IsHiding && ProgressValue > 1;
+
         public ViewModel()
         {
 
@@ -78,6 +94,7 @@ namespace CryDuplicateFinder
         public async Task Start(DuplicateCheckingMode mode)
         {
             IsBusy = true;
+            IsHiding = false;
             SelectedFile = null;
             Status = "Starting...";
             try
@@ -131,6 +148,7 @@ namespace CryDuplicateFinder
 
         Task AnalyzeDirectory()
         {
+            var context = SynchronizationContext.Current;
             return Task.Run(() =>
             {
                 // Get all images in all directories
@@ -160,15 +178,40 @@ namespace CryDuplicateFinder
                     });
 
                 // Set observable collection
-                Files = new(files);
-                ProgressMax = Files.Count;
-                ProgressValue = 0;
+                context.Post(d =>
+                {
+                    Files = new(files);
+                    ProgressMax = Files.Count;
+                    ProgressValue = 0;
+                }, null);
             });
         }
 
         Task FindDuplicates(FileEntry file, DuplicateCheckingMode mode)
         {
             return file.CheckForDuplicates(Files, mode);
+        }
+
+        public void HideFilesWithoutDuplicates()
+        {
+            if (IsHiding || Files == null || FilesView == null) return;
+            
+            if (FilesView.View.Filter == null)
+            {
+                FilesView.View.Filter = (a) =>
+                {
+                    var f = (FileEntry)a;
+                    if (f.FinishedAnalysis != null && f.Duplicates.Count == 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                };
+            }
+            else FilesView.View.Refresh();                   
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
