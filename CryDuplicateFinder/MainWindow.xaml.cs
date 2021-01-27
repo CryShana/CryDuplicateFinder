@@ -1,10 +1,11 @@
-﻿using FolderBrowserEx;
+﻿using CryDuplicateFinder.Algorithms;
+
+using FolderBrowserEx;
 
 using System;
 using System.Windows;
 using System.Windows.Controls;
 
-using static CryDuplicateFinder.DuplicateChecker;
 
 namespace CryDuplicateFinder
 {

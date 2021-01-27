@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="FolderBrowserEx" Version="1.0.1" />
     <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.1.20210123" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
   </ItemGroup>
 
 </Project>
