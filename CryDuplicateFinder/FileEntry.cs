@@ -137,7 +137,7 @@ namespace CryDuplicateFinder
                         {
                             context.Post(d =>
                             {
-                                lock (padlock) FilesChecked++;
+                                lock (padlock) filesChecked++;
                             }, null);
                             return;
                         }
@@ -166,7 +166,7 @@ namespace CryDuplicateFinder
                                 if (token.IsCancellationRequested) return;
 
                                 if (isDuplicate) RegisterDuplicate(f, similarity, sw.Elapsed.TotalMilliseconds);
-                                lock (padlock) FilesChecked++;
+                                lock (padlock) filesChecked++;
                             }, null);
                         }
                     });

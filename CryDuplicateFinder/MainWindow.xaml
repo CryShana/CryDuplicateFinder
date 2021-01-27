@@ -20,7 +20,8 @@
             <ComboBoxItem Content="Histogram"/>
             <ComboBoxItem Content="Features"/>
         </ComboBox>
-        <ListView ItemsSource="{Binding FilesView.View, Mode=OneWay}" SelectionChanged="ListView_SelectionChanged" Margin="10,73,4,38">
+        <ListView ItemsSource="{Binding FilesView.View, Mode=OneWay}" SelectionChanged="ListView_SelectionChanged" 
+                  Margin="10,73,4,38" SelectionMode="Single">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown_1">
@@ -45,7 +46,7 @@
             </ListView.ItemTemplate>
         </ListView>
         <ListView Margin="4,73,166,10" Grid.Column="1" ItemsSource="{Binding SelectedFile.DuplicatesView.View, Mode=OneWay}"
-                  ScrollViewer.CanContentScroll="False" x:Name="similarList">
+                  ScrollViewer.CanContentScroll="False" x:Name="similarList" SelectionMode="Single">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown" HorizontalAlignment="Stretch">

@@ -49,7 +49,7 @@ namespace CryDuplicateFinder.Algorithms
             return Math.Max(sim1, sim2);
         }
 
-        (int[] b, int[] g, int[] r) GetHistogramGroups(Mat m, int groupCount)
+        public static (int[] b, int[] g, int[] r) GetHistogramGroups(Mat m, int groupCount)
         {
             using var mat3 = new Mat<Vec3b>(m);
             var indexer = mat3.GetIndexer();
@@ -76,7 +76,7 @@ namespace CryDuplicateFinder.Algorithms
             return (br, gr, rr);
         }
 
-        (double b, double g, double r) ComputerHistogramDifferences((int[] b, int[] g, int[] r, int pixels) h1, (int[] b, int[] g, int[] r, int pixels) h2)
+        public static (double b, double g, double r) ComputerHistogramDifferences((int[] b, int[] g, int[] r, int pixels) h1, (int[] b, int[] g, int[] r, int pixels) h2)
         {
             double b = 0;
             double g = 0;
@@ -93,7 +93,7 @@ namespace CryDuplicateFinder.Algorithms
             return (b, g, r);
         }
 
-        double GetSimilarityFromDifferences((double b, double g, double r) differences)
+        public static double GetSimilarityFromDifferences((double b, double g, double r) differences)
         {
             var meanDiff = (differences.b + differences.g + differences.r) / 3.0;
             var similarity = 1 - meanDiff;
@@ -126,6 +126,6 @@ namespace CryDuplicateFinder.Algorithms
             cache.Clear();
         }
 
-        public double GetMinRequiredSimilarity() => 0.81;
+        public double GetMinRequiredSimilarity() => 0.87;
     }
 }
