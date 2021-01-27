@@ -41,7 +41,11 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown">
-                        <Image Source="{Binding file.Path, Mode=OneWay}" Width="120" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <Image Width="120" RenderOptions.BitmapScalingMode="HighQuality">
+                            <Image.Source>
+                                <BitmapImage UriSource="{Binding file.Path, Mode=OneWay}" DecodePixelWidth="200" CacheOption="OnLoad" />
+                            </Image.Source>
+                        </Image>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="{Binding file.Path, Mode=OneWay}" />
                             <TextBlock Text="{Binding similarityText, Mode=OneWay}" />
@@ -50,8 +54,14 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <Image Grid.Column="1" Source="{Binding SelectedFile.Path, Mode=OneWay}" RenderOptions.BitmapScalingMode="HighQuality"
-               Height="195" Margin="0,73,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="149"/>
+
+        <Image Grid.Column="1" RenderOptions.BitmapScalingMode="HighQuality" Source="{Binding SelectedFileImage, Mode=OneWay}"
+               Width="149" Height="195" Margin="0,73,10,0" VerticalAlignment="Top" HorizontalAlignment="Right">
+            <!--<Image.Source>
+                <BitmapImage UriSource="{Binding SelectedFileImage, Mode=OneWay}" DecodePixelWidth="250" CacheOption="OnLoad" />
+            </Image.Source>-->
+        </Image>
+        
         <TextBlock Grid.Column="1" Margin="0,52,10,0" Text="{Binding SpeedStatus, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="287" Foreground="#FF2C94DC"/>
         <Button Click="DeleteLocalSimilarImages" IsEnabled="{Binding CanDeleteLocal, Mode=OneWay}" Content="Delete similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,296,10,0" VerticalAlignment="Top" Width="151" Height="20"/>
         <TextBox Grid.Column="1" HorizontalAlignment="Right" IsTabStop="False" Margin="0,273,10,0" Text="{Binding MinSimilarity, Mode=TwoWay}" TextWrapping="Wrap" VerticalAlignment="Top" Width="44"/>

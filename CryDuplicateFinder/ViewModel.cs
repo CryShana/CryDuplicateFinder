@@ -10,6 +10,9 @@ using System.Windows;
 using CryDuplicateFinder.Algorithms;
 using System.Windows.Data;
 using System.Threading;
+using OpenCvSharp;
+using System.Drawing;
+using System.Windows.Media;
 
 namespace CryDuplicateFinder
 {
@@ -37,7 +40,15 @@ namespace CryDuplicateFinder
         }
 
         public int ProgressMax { get => prgMax; set { prgMax = value; Changed(); } }
-        public int ProgressValue { get => prgVal; set { prgVal = value; Changed(); Changed(nameof(CanDeleteGlobal)); Changed(nameof(CanHide)); } }
+        public int ProgressValue
+        {
+            get => prgVal; set
+            {
+                prgVal = value;
+                Changed();
+                Changed(nameof(CanHide));
+            }
+        }
         public string Status { get => status ?? "Idle"; set { status = value; Changed(); } }
         public string SpeedStatus { get => speedStatus ?? "Waiting to start"; set { speedStatus = value; Changed(); } }
         public ObservableCollection<FileEntry> Files
@@ -86,12 +97,24 @@ namespace CryDuplicateFinder
                 Changed(nameof(StartReady));
                 Changed(nameof(SelectionReady));
                 Changed(nameof(StartButtonText));
+                Changed(nameof(CanDeleteLocal));
+                Changed(nameof(CanDeleteGlobal));
             }
         }
 
-        public FileEntry SelectedFile { get => selectedFile; set { selectedFile = value; Changed(); Changed(nameof(CanDeleteLocal)); } }
-        public bool CanDeleteLocal => SelectedFile != null && SelectedFile.FinishedAnalysis != null;
-        public bool CanDeleteGlobal => ProgressValue == ProgressMax;
+        public FileEntry SelectedFile
+        {
+            get => selectedFile; set
+            {
+                selectedFile = value;
+                Changed();
+                Changed(nameof(CanDeleteLocal));
+                Changed(nameof(SelectedFileImage));
+            }
+        }
+        public string SelectedFileImage => SelectedFile?.Path ?? GetUriToTempImage();
+        public bool CanDeleteLocal => SelectedFile != null && SelectedFile.FinishedAnalysis != null && !IsBusy;
+        public bool CanDeleteGlobal => !IsBusy;
 
         public bool IsHiding { get => hiding; private set { hiding = value; Changed(); Changed(nameof(CanHide)); } }
         public bool CanHide => !IsHiding && ProgressValue > 1;
@@ -238,6 +261,28 @@ namespace CryDuplicateFinder
                 };
             }
             else FilesView.View.Refresh();
+        }
+
+        const string tempImagePath = "empty.jpg";
+        string GetUriToTempImage()
+        {
+            // DIRTY WORKAROUND (Using BitmapImage in XML and it crashes if UriSource is NULL at any point in time)
+            // Here I create a temporary gray file to fill that emptiness (looks better anyway)
+
+            if (File.Exists(tempImagePath)) return new FileInfo(tempImagePath).FullName;
+
+            int w = 149, h = 195;
+
+            Bitmap Bmp = new Bitmap(w, h);
+            using (Graphics gfx = Graphics.FromImage(Bmp))
+            using (SolidBrush brush = new SolidBrush(System.Drawing.Color.LightGray))
+            {
+                gfx.FillRectangle(brush, 0, 0, w, h);
+            }
+            Bmp.Save(tempImagePath);
+
+            var info = new FileInfo(tempImagePath).FullName;
+            return info;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

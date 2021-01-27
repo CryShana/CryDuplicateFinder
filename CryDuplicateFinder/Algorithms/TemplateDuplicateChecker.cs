@@ -27,5 +27,7 @@ namespace CryDuplicateFinder.Algorithms
         {
             img?.Dispose();
         }
+
+        public double GetMinRequiredSimilarity() => 0.5;
     }
 }
