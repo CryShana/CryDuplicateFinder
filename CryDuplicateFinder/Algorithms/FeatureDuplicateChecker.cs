@@ -54,7 +54,6 @@ namespace CryDuplicateFinder.Algorithms
                 }
             }
 
-
             var matcher = new BFMatcher(NormTypes.Hamming, true);
             var matches = matcher.Match(descriptors, descriptors2);
             var mean = matches.Average(x => x.Distance);

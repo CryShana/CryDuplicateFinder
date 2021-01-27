@@ -14,29 +14,37 @@ namespace CryDuplicateFinder.Algorithms
         static ConcurrentDictionary<string, (int[] r, int[] g, int[] b, int pixels)> cache = new();
 
         Mat img;
+        string original;
         const int MaxDimension = 100;
 
         public double CalculateSimiliarityTo(string image)
-        {        
+        {
             const int histogramGroups = 16;
 
-            var h1 = GetHistogramGroups(img, histogramGroups);
-            var isCached = cache.TryGetValue(image, out var h2);
-            if (!isCached)
+            var isCached1 = cache.TryGetValue(original, out var h1);
+            if (!isCached1)
+            {
+                (h1.b, h1.g, h1.r) = GetHistogramGroups(img, histogramGroups);
+                h1.pixels = img.Width * img.Height;
+            }
+
+            var isCached2 = cache.TryGetValue(image, out var h2);
+            if (!isCached2)
             {
                 using var img2 = GetImage(image);
                 (h2.b, h2.g, h2.r) = GetHistogramGroups(img2, histogramGroups);
                 h2.pixels = img2.Width * img2.Height;
             }
 
-            var diff1 = ComputerHistogramDifferences(h1, (h2.b, h2.g, h2.r));
-            var diff2 = ComputerHistogramDifferences((h2.b, h2.g, h2.r), h1);
+            var diff1 = ComputerHistogramDifferences((h1.b, h1.g, h1.r), (h2.b, h2.g, h2.r));
+            var diff2 = ComputerHistogramDifferences((h2.b, h2.g, h2.r), (h1.b, h1.g, h1.r));
 
-            var sim1 = GetSimilarityFromDifferences(img.Width * img.Height, diff1);
+            var sim1 = GetSimilarityFromDifferences(h1.pixels, diff1);
             var sim2 = GetSimilarityFromDifferences(h2.pixels, diff2);
 
             // cache it if there is space
-            if (!isCached && cache.Count < MaxCacheCapacity) cache.TryAdd(image, h2);
+            if (!isCached1 && cache.Count < MaxCacheCapacity) cache.TryAdd(original, h1);
+            if (!isCached2 && cache.Count < MaxCacheCapacity) cache.TryAdd(image, h2);
 
             return Math.Max(sim1, sim2);
         }
@@ -92,8 +100,14 @@ namespace CryDuplicateFinder.Algorithms
             return similarity;
         }
 
-        public void LoadImage(string image) => img = GetImage(image);
-        
+        public void LoadImage(string image)
+        {
+            original = image;
+
+            var isCached = cache.TryGetValue(image, out _);
+            if (!isCached) img = GetImage(image);
+        }
+
         Mat GetImage(string image)
         {
             var m = CvHelpers.OpenImage(image, ImreadModes.Color);
