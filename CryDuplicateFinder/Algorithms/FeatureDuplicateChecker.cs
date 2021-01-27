@@ -9,16 +9,18 @@ namespace CryDuplicateFinder.Algorithms
     {
         static int MaxCacheCapacity = 500_000;
         static ConcurrentDictionary<string, Mat> cache = new();
-
+        
         Mat img;
-        string original;
-        const int MaxDimension = 300;
+        string original;  
+        const int MaxDimension = 300; 
 
         public double CalculateSimiliarityTo(string image)
         {
             var isCached = cache.TryGetValue(image, out Mat descriptors2);
+            var isCachedOriginal = cache.TryGetValue(original, out Mat dstp);
+            Mat descriptors = null;
 
-            using var descriptors = new Mat();
+            // only compute if no value is cached
             using (var orb = ORB.Create(
                 nFeatures: 640,
                 scaleFactor: 1.2f,
@@ -28,11 +30,18 @@ namespace CryDuplicateFinder.Algorithms
                 wtaK: 2,
                 scoreType: ORBScoreType.Harris,
                 patchSize: 31,
-                fastThreshold: 20)
-            )
+                fastThreshold: 20))
             {
-                orb.DetectAndCompute(img, null, out KeyPoint[] imgKeypoints, descriptors);
+                // check if original image had cached descriptors
+                if (!isCachedOriginal)
+                {
+                    descriptors = new Mat();
+                    orb.DetectAndCompute(img, null, out KeyPoint[] imgKeypoints, descriptors);
+                    if (cache.Count < MaxCacheCapacity) cache.TryAdd(original, descriptors);
+                }
+                else descriptors = dstp;            
 
+                // check if target image is cached
                 if (!isCached)
                 {
                     using var img2 = GetImage(image);
@@ -42,31 +51,13 @@ namespace CryDuplicateFinder.Algorithms
 
                     // cache it if there is space
                     if (cache.Count < MaxCacheCapacity) cache.TryAdd(image, descriptors2);
-
-                    /*
-                    // FOR DEBUGGING
-                    var matcher2 = new BFMatcher(NormTypes.Hamming, true);
-                    var matches2 = matcher2.Match(descriptors, descriptors2);
-
-                    var or = original;
-                    var to = image;
-                    var mean2 = matches2.Average(x => x.Distance);
-                    var count = matches2.Count(x => x.Distance < mean2) / (double)matches2.Length;
-
-                    using var outimg = new Mat();
-                    Cv2.DrawMatches(img, imgKeypoints, GetImage(image), imgKeypoints2, matches2, outimg);
-                    Cv2.PutText(outimg, $"Mean: {mean2}, Fac: {count}", new(0, outimg.Height), HersheyFonts.HersheyPlain, 1, Scalar.Red, 1);
-                    Cv2.ImShow("i", outimg); Cv2.WaitKey(); Cv2.DestroyAllWindows();
-                    */
                 }
             }
+
 
             var matcher = new BFMatcher(NormTypes.Hamming, true);
             var matches = matcher.Match(descriptors, descriptors2);
             var mean = matches.Average(x => x.Distance);
-
-            // non-matches have means around 55 - 80
-            // matches have means around 0 - 40
 
             // MAPPING
             // 0... 100% similarity
@@ -95,7 +86,9 @@ namespace CryDuplicateFinder.Algorithms
         public void LoadImage(string image)
         {
             original = image;
-            img = GetImage(image);
+
+            var isCached = cache.TryGetValue(original, out _);
+            if (!isCached) img = GetImage(image);
         }
 
         Mat GetImage(string image)
@@ -108,6 +101,7 @@ namespace CryDuplicateFinder.Algorithms
         public void Dispose()
         {
             img?.Dispose();
+
         }
 
         public static void ClearCache()
