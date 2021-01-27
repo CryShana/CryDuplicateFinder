@@ -17,7 +17,7 @@ namespace CryDuplicateFinder
 
         ObservableCollection<FileEntry> files = new();
         bool startReady = false, selectionReady = true, busy = false;
-        string rootdir = null, status = null;
+        string rootdir = null, status = null, speedStatus = null;
         int prgMax = 100, prgVal = 0;
 
         public string RootDirectory
@@ -35,6 +35,7 @@ namespace CryDuplicateFinder
         public int ProgressMax { get => prgMax; set { prgMax = value; Changed(); } }
         public int ProgressValue { get => prgVal; set { prgVal = value; Changed(); } }
         public string Status { get => status ?? "Idle"; set { status = value; Changed(); } }
+        public string SpeedStatus { get => speedStatus ?? "Waiting to start"; set { speedStatus = value; Changed(); } }
         public ObservableCollection<FileEntry> Files { get => files; set { files = value; Changed(); } }
 
         public bool StartReady { get => startReady; set { startReady = value; Changed(); } }
