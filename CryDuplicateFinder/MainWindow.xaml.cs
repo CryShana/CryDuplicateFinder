@@ -175,13 +175,6 @@ namespace CryDuplicateFinder
             ProcessLocalDuplicates(minSimilarity, selected, f =>
             {
                 if (File.Exists(f.file.Path)) File.Delete(f.file.Path);
-
-                vm.Files.Remove(f.file);
-                foreach (var ff in vm.Files)
-                    if (ff.Duplicates.Remove(f)) 
-                        ff.DuplicatesView.View.Refresh();
-
-                vm.FilesView.View.Refresh(); 
             });
         }
 
@@ -201,20 +194,44 @@ namespace CryDuplicateFinder
                 try
                 {
                     if (File.Exists(f.Path)) File.Delete(f.Path);
+                }
+                catch (Exception ex)
+                {
+                    // TODO: log
+                }
+            });
+        }
 
-                    vm.Files.Remove(f);
-                    foreach (var ff in vm.Files)
-                        for (int i = 0; i < ff.Duplicates.Count; i++)
-                        {
-                            if (ff.Duplicates[i].file == f)
-                            {
-                                ff.Duplicates.RemoveAt(i);
-                                i--;
-                            }
-                            ff.DuplicatesView.View.Refresh();
-                        }
+        void MoveGlobalSimilarImages(object sender, RoutedEventArgs e)
+        {
+            var minSimilarity = vm.MinSimilarity / 100.0;
 
-                    vm.FilesView.View.Refresh();
+            var browser = new FolderBrowserDialog();
+            browser.Title = "Select root directory to move duplicates to";
+            browser.InitialFolder = @"C:\";
+            browser.AllowMultiSelect = false;
+            if (browser.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+
+            var newRoot = browser.SelectedFolder;
+
+            vm.SelectedFile = null;
+
+            // delete all images (go through all files, retain the highest resolution duplicate, delete others)
+            ProcessGlobalDuplicates(minSimilarity, f =>
+            {
+                try
+                {
+                    var relativePath = Path.GetRelativePath(vm.RootDirectory, f.Path);
+                    var newPath = Path.Join(newRoot, relativePath);
+
+                    if (File.Exists(f.Path))
+                    {
+                        // make sure dir exists
+                        var dir = Path.GetDirectoryName(newPath);
+                        Directory.CreateDirectory(dir);
+
+                        File.Move(f.Path, newPath, true);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -232,7 +249,17 @@ namespace CryDuplicateFinder
                 affected.Add(f);
             }
 
-            foreach (var f in affected) action(f);
+            foreach (var f in affected)
+            {
+                action(f);
+
+                vm.Files.Remove(f.file);
+                foreach (var ff in vm.Files)
+                    if (ff.Duplicates.Remove(f))
+                        ff.DuplicatesView.View.Refresh();
+
+                vm.FilesView.View.Refresh();
+            }
         }
 
         void ProcessGlobalDuplicates(double minSimilarity, Action<FileEntry> action)
@@ -245,11 +272,12 @@ namespace CryDuplicateFinder
                 if (f.Duplicates.Count == 0) continue;
                 if (inAffected.Contains(f)) continue;
                 _ = f.Resolution;
+                f.GetResolutionTask().Wait();
 
                 var gottaCheck = new List<FileEntry.SimilarFileEntry>() { new(f, 1, "", 0) };
                 foreach (var ff in f.Duplicates)
                 {
-                    if (ff.similarity < minSimilarity) continue;
+                    if (ff.similarity < minSimilarity || inAffected.Contains(ff.file)) continue;
 
                     // now select the highest res file
                     _ = ff.file.Resolution;
@@ -274,7 +302,24 @@ namespace CryDuplicateFinder
                 }
             }
 
-            foreach (var f in affected) action(f);
+            foreach (var f in affected)
+            {
+                action(f);
+
+                vm.Files.Remove(f);
+                foreach (var ff in vm.Files)
+                    for (int i = 0; i < ff.Duplicates.Count; i++)
+                    {
+                        if (ff.Duplicates[i].file == f)
+                        {
+                            ff.Duplicates.RemoveAt(i);
+                            i--;
+                        }
+                        ff.DuplicatesView.View.Refresh();
+                    }
+
+                vm.FilesView.View.Refresh();
+            }
         }
 
         void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();
