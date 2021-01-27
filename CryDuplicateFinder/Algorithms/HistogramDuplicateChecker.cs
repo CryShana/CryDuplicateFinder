@@ -36,11 +36,11 @@ namespace CryDuplicateFinder.Algorithms
                 h2.pixels = img2.Width * img2.Height;
             }
 
-            var diff1 = ComputerHistogramDifferences((h1.b, h1.g, h1.r), (h2.b, h2.g, h2.r));
-            var diff2 = ComputerHistogramDifferences((h2.b, h2.g, h2.r), (h1.b, h1.g, h1.r));
+            var diff1 = ComputerHistogramDifferences(h1, h2);
+            var diff2 = ComputerHistogramDifferences(h2, h1);
 
-            var sim1 = GetSimilarityFromDifferences(h1.pixels, diff1);
-            var sim2 = GetSimilarityFromDifferences(h2.pixels, diff2);
+            var sim1 = GetSimilarityFromDifferences(diff1);
+            var sim2 = GetSimilarityFromDifferences(diff2);
 
             // cache it if there is space
             if (!isCached1 && cache.Count < MaxCacheCapacity) cache.TryAdd(original, h1);
@@ -76,26 +76,27 @@ namespace CryDuplicateFinder.Algorithms
             return (br, gr, rr);
         }
 
-        (int b, int g, int r) ComputerHistogramDifferences((int[] b, int[] g, int[] r) h1, (int[] b, int[] g, int[] r) h2)
+        (double b, double g, double r) ComputerHistogramDifferences((int[] b, int[] g, int[] r, int pixels) h1, (int[] b, int[] g, int[] r, int pixels) h2)
         {
-            int b = 0;
-            int g = 0;
-            int r = 0;
+            double b = 0;
+            double g = 0;
+            double r = 0;
 
             for (int i = 0; i < h1.b.Length; i++)
             {
-                b += Math.Abs(h2.b[i] - h1.b[i]);
-                g += Math.Abs(h2.g[i] - h1.g[i]);
-                r += Math.Abs(h2.r[i] - h1.r[i]);
+                // subtract NORMALIZED pixel counts
+                b += Math.Abs(((double)h2.b[i] / h2.pixels) - ((double)h1.b[i] / h1.pixels));
+                g += Math.Abs(((double)h2.g[i] / h2.pixels) - ((double)h1.g[i] / h1.pixels));
+                r += Math.Abs(((double)h2.r[i] / h2.pixels) - ((double)h1.r[i] / h1.pixels));
             }
 
             return (b, g, r);
         }
 
-        double GetSimilarityFromDifferences(int pixels, (int b, int g, int r) differences)
+        double GetSimilarityFromDifferences((double b, double g, double r) differences)
         {
             var meanDiff = (differences.b + differences.g + differences.r) / 3.0;
-            var similarity = 1 - (meanDiff / pixels);
+            var similarity = 1 - meanDiff;
             if (similarity < 0) similarity = 0;
             return similarity;
         }
@@ -125,6 +126,6 @@ namespace CryDuplicateFinder.Algorithms
             cache.Clear();
         }
 
-        public double GetMinRequiredSimilarity() => 0.77;
+        public double GetMinRequiredSimilarity() => 0.81;
     }
 }
