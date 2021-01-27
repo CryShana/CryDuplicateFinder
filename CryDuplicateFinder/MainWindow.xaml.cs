@@ -17,7 +17,7 @@ namespace CryDuplicateFinder
     public partial class MainWindow : Window
     {
         ViewModel vm;
-        System.Timers.Timer speedtimer = new(300);
+        Timer speedtimer = new(300);
 
         public MainWindow()
         {
@@ -38,14 +38,21 @@ namespace CryDuplicateFinder
                 return;
             }
 
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new(e.Path);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            bitmap.Freeze();
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new(e.Path);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
 
-            selectedImage.Source = bitmap;
+                selectedImage.Source = bitmap;
+            }
+            catch
+            {
+                selectedImage.Source = null;
+            }
         }
 
         void Speedtimer_Elapsed(object sender, ElapsedEventArgs e)

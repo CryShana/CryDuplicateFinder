@@ -60,7 +60,7 @@ namespace CryDuplicateFinder
                     return "-";
                 }
 
-                return resolution;          
+                return resolution;
             }
             set
             {
@@ -82,7 +82,7 @@ namespace CryDuplicateFinder
             });
         }
 
-        public FileEntry() {}
+        public FileEntry() { }
 
         void InitializeView()
         {
@@ -121,8 +121,8 @@ namespace CryDuplicateFinder
                 {
                     Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = maxThreads }, f =>
                     {
-                    // ignore same file or file already part of duplicates
-                    if (f == this || token.IsCancellationRequested) return;
+                        // ignore same file or file already part of duplicates
+                        if (f == this || token.IsCancellationRequested) return;
                         if (Duplicates.Where(x => x.file == f).FirstOrDefault() != default)
                         {
                             context.Post(d =>
@@ -138,21 +138,21 @@ namespace CryDuplicateFinder
 
                         try
                         {
-                        // get similarity
-                        similarity = checker.CalculateSimiliarityTo(f.Path);
+                            // get similarity
+                            similarity = checker.CalculateSimiliarityTo(f.Path);
                             isDuplicate = similarity >= minSim;
                         }
                         catch (Exception ex)
                         {
-                        // TODO: maybe log
-                    }
+                            // TODO: maybe log
+                        }
                         finally
                         {
                             sw.Stop();
 
-                        // then add to collection
-                        context.Post(d =>
-                    {
+                            // then add to collection
+                            context.Post(d =>
+                            {
                                 if (token.IsCancellationRequested) return;
 
                                 if (isDuplicate) RegisterDuplicate(f, similarity, sw.Elapsed.TotalMilliseconds);
@@ -163,6 +163,7 @@ namespace CryDuplicateFinder
                 }
                 finally
                 {
+                    FilesChecked = FilesToCheck;
                     FinishedAnalysis = DateTime.Now;
                     checker.Dispose();
                 }
