@@ -409,5 +409,25 @@ namespace CryDuplicateFinder
 
             RemoveFile(f);
         }
+
+        private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (vm.FilesView == null || vm.Files.Count == 0) return;
+
+            var txt = txtSearch.Text.Trim().ToLower();
+            if (string.IsNullOrEmpty(txt))
+            {
+                vm.FilesView.View.Filter = null;
+                return;
+            }
+
+            vm.FilesView.View.Filter = a =>
+            {
+                var f = (FileEntry)a;
+
+                if (f.Path.ToLower().Contains(txt)) return true;
+                return false;
+            };
+        }
     }
 }
