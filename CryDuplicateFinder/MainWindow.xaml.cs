@@ -147,6 +147,8 @@ namespace CryDuplicateFinder
 
         void StackPanel_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed) return;
+
             var now = DateTime.Now;
             var elapsed = (now - lastMouseDown).TotalMilliseconds;
             var item = (FileEntry.SimilarFileEntry)(sender as StackPanel).DataContext;
@@ -167,6 +169,8 @@ namespace CryDuplicateFinder
         }
         void StackPanel_MouseDown_1(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed) return;
+
             var now = DateTime.Now;
             var elapsed = (now - lastMouseDown).TotalMilliseconds;
             var file = (FileEntry)(sender as StackPanel).DataContext;
@@ -327,23 +331,83 @@ namespace CryDuplicateFinder
             foreach (var f in affected)
             {
                 action(f);
-
-                vm.Files.Remove(f);
-                foreach (var ff in vm.Files)
-                    for (int i = 0; i < ff.Duplicates.Count; i++)
-                    {
-                        if (ff.Duplicates[i].file == f)
-                        {
-                            ff.Duplicates.RemoveAt(i);
-                            i--;
-                        }
-                        ff.DuplicatesView.View.Refresh();
-                    }
-
-                vm.FilesView.View.Refresh();
+                RemoveFile(f);
             }
         }
 
-        void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();     
+        void RemoveFile(FileEntry f)
+        {
+            vm.Files.Remove(f);
+            foreach (var ff in vm.Files)
+                for (int i = 0; i < ff.Duplicates.Count; i++)
+                {
+                    if (ff.Duplicates[i].file == f)
+                    {
+                        ff.Duplicates.RemoveAt(i);
+                        i--;
+                    }
+                    ff.DuplicatesView.View.Refresh();
+                }
+
+            vm.FilesView.View.Refresh();
+        }
+
+        void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();
+
+        void MenuItem_SelectFileEntry(object sender, RoutedEventArgs e)
+        {
+            var menuItem = (MenuItem)sender;
+
+            FileEntry f = null;
+            if (menuItem.DataContext is FileEntry ff) f = ff;
+            else f = (menuItem.DataContext as FileEntry.SimilarFileEntry)?.file;
+            if (f == null) return;
+
+            vm.SelectedFile = f;
+        }
+
+        void MenuItem_DeleteFileEntry(object sender, RoutedEventArgs e)
+        {
+            var menuItem = (MenuItem)sender;
+
+            FileEntry f = null;
+            if (menuItem.DataContext is FileEntry ff) f = ff;
+            else f = (menuItem.DataContext as FileEntry.SimilarFileEntry)?.file;
+            if (f == null) return;
+
+            if (File.Exists(f.Path)) File.Delete(f.Path);
+
+            RemoveFile(f);
+        }
+
+        void MenuItem_ShowInExplorer(object sender, RoutedEventArgs e)
+        {
+            var menuItem = (MenuItem)sender;
+
+            FileEntry f = null;
+            if (menuItem.DataContext is FileEntry ff) f = ff;
+            else f = (menuItem.DataContext as FileEntry.SimilarFileEntry)?.file;
+            if (f == null) return;
+
+            string args = string.Format("/e, /select, \"{0}\"", f.Path);
+            var info = new ProcessStartInfo
+            {
+                FileName = "explorer",
+                Arguments = args
+            };
+            Process.Start(info);
+        }
+
+        void MenuItem_ExcludeFromSimilar(object sender, RoutedEventArgs e)
+        {
+            var menuItem = (MenuItem)sender;
+
+            FileEntry f = null;
+            if (menuItem.DataContext is FileEntry ff) f = ff;
+            else f = (menuItem.DataContext as FileEntry.SimilarFileEntry)?.file;
+            if (f == null) return;
+
+            RemoveFile(f);
+        }
     }
 }

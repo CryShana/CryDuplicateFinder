@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CryDuplicateFinder"
         mc:Ignorable="d" DataContext="{StaticResource viewModel}"
-        Title="CryDuplicateFinder" Height="450" Width="800" MinWidth="600" MinHeight="450">
+        Title="CryDuplicateFinder" Height="550" Width="1000" MinWidth="650" MinHeight="450">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="37*"/>
@@ -24,6 +24,13 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown_1">
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Delete" Click="MenuItem_DeleteFileEntry" />
+                                <MenuItem Header="Show in folder" Click="MenuItem_ShowInExplorer" />
+                                <MenuItem Header="Exclude from similar images" Click="MenuItem_ExcludeFromSimilar" />
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
                         <TextBlock>
                             <Run Text="[" FontWeight="Bold" />
                             <Run Text="{Binding Progress, Mode=OneWay}" FontWeight="Bold" Foreground="{Binding ProgressColor, Mode=OneWay}" />
@@ -38,10 +45,18 @@
             </ListView.ItemTemplate>
         </ListView>
         <ListView Margin="4,73,166,10" Grid.Column="1" ItemsSource="{Binding SelectedFile.DuplicatesView.View, Mode=OneWay}"
-                  ScrollViewer.CanContentScroll="False">
+                  ScrollViewer.CanContentScroll="False" x:Name="similarList">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown">
+                    <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown" HorizontalAlignment="Stretch">
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Select" Click="MenuItem_SelectFileEntry" />
+                                <MenuItem Header="Delete" Click="MenuItem_DeleteFileEntry" />
+                                <MenuItem Header="Show in folder" Click="MenuItem_ShowInExplorer" />
+                                <MenuItem Header="Exclude from similar images" Click="MenuItem_ExcludeFromSimilar" />
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
                         <Image Width="120" RenderOptions.BitmapScalingMode="HighQuality">
                             <Image.Source>
                                 <BitmapImage UriSource="{Binding file.Path, Mode=OneWay}" DecodePixelWidth="200" CacheOption="OnLoad" />
@@ -55,14 +70,6 @@
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
-            <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Select" />
-                    <MenuItem Header="Delete" />
-                    <MenuItem Header="Show in folder" />
-                    <MenuItem Header="Exclude from similar images" />
-                </ContextMenu>
-            </ListView.ContextMenu>
         </ListView>
 
         <Canvas Width="149" Height="195" Margin="0,73,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Background="#FFE8E8E8">
