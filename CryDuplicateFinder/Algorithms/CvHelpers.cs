@@ -26,8 +26,8 @@ namespace CryDuplicateFinder.Algorithms
 
         public static Mat OpenImage(string path, ImreadModes mode = ImreadModes.Color)
         {
-            var fstream = File.OpenRead(path);
-            return Mat.FromStream(fstream, mode);
+            var stream = new MemoryStream(File.ReadAllBytes(path));
+            return Mat.FromStream(stream, mode);
         }
     }
 }
