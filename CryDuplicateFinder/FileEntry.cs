@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -21,6 +22,7 @@ namespace CryDuplicateFinder
         string path;
         int filesChecked = 0;
         int filesToCheck = 1;
+        string resolution = null;
         CollectionViewSource dupsView;
         ObservableCollection<SimilarFileEntry> dups;
 
@@ -41,17 +43,46 @@ namespace CryDuplicateFinder
         public string Progress => $"{((filesChecked / filesToCheck) * 100):0.00}%";
         public SolidColorBrush ProgressColor => filesChecked < filesToCheck ? Brushes.Red : Brushes.Green;
         public SolidColorBrush DuplicateColor => DuplicateCount == 0 ? Brushes.LightGray : Brushes.Black;
-        
-        public ObservableCollection<SimilarFileEntry> Duplicates { get => dups; set { dups = value; Changed(); InitializeView();  } }
+
+        public ObservableCollection<SimilarFileEntry> Duplicates { get => dups; set { dups = value; Changed(); InitializeView(); } }
         public CollectionViewSource DuplicatesView { get => dupsView; set { dupsView = value; Changed(); } }
         public int DuplicateCount => Duplicates?.Count ?? 0;
         public DateTime? StartedAnalysis { get; private set; }
         public DateTime? FinishedAnalysis { get; private set; }
 
-        public FileEntry()
+        public string Resolution
         {
-            
+            get
+            {
+                if (resolution == null)
+                {
+                    _ = getResolution();
+                    return "-";
+                }
+
+                return resolution;          
+            }
+            set
+            {
+                resolution = value;
+                Changed();
+            }
         }
+
+        bool resRequest = false;
+        Task getResolution()
+        {
+            if (resRequest) return Task.CompletedTask;
+            resRequest = true;
+
+            return Task.Run(() =>
+            {
+                if (!File.Exists(Path)) Resolution = "Missing image";
+                using (var mat = CvHelpers.OpenImage(Path)) Resolution = $"{mat.Width}x{mat.Height}";
+            });
+        }
+
+        public FileEntry() {}
 
         void InitializeView()
         {
@@ -80,7 +111,7 @@ namespace CryDuplicateFinder
             var context = SynchronizationContext.Current;
 
             return Task.Run(() =>
-            {  
+            {
                 var checker = GetDuplicateChecker(mode);
                 checker.LoadImage(Path);
 
@@ -90,10 +121,10 @@ namespace CryDuplicateFinder
                 {
                     Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = maxThreads }, f =>
                     {
-                        // ignore same file or file already part of duplicates
-                        if (f == this || token.IsCancellationRequested) return;
+                    // ignore same file or file already part of duplicates
+                    if (f == this || token.IsCancellationRequested) return;
                         if (Duplicates.Where(x => x.file == f).FirstOrDefault() != default)
-                        {                           
+                        {
                             context.Post(d =>
                             {
                                 lock (padlock) FilesChecked++;
@@ -107,21 +138,21 @@ namespace CryDuplicateFinder
 
                         try
                         {
-                            // get similarity
-                            similarity = checker.CalculateSimiliarityTo(f.Path);
-                            isDuplicate = similarity >= minSim;                             
+                        // get similarity
+                        similarity = checker.CalculateSimiliarityTo(f.Path);
+                            isDuplicate = similarity >= minSim;
                         }
                         catch (Exception ex)
                         {
-                            // TODO: maybe log
-                        }
+                        // TODO: maybe log
+                    }
                         finally
                         {
                             sw.Stop();
 
-                            // then add to collection
-                            context.Post(d =>
-                            {
+                        // then add to collection
+                        context.Post(d =>
+                    {
                                 if (token.IsCancellationRequested) return;
 
                                 if (isDuplicate) RegisterDuplicate(f, similarity, sw.Elapsed.TotalMilliseconds);

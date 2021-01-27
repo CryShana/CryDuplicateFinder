@@ -174,6 +174,22 @@ namespace CryDuplicateFinder
                 $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
             // TODO: delete global images (prioritize higher resolutions)
+            /*var toDelete = new List<FileEntry.SimilarFileEntry>();
+            foreach (var f in vm.Files)
+            {
+                if (f.similarity < minSimilarity) continue;
+                toDelete.Add(f);
+            }
+
+            foreach (var f in toDelete)
+            {
+                if (File.Exists(f.file.Path)) File.Delete(f.file.Path);
+
+                vm.Files.Remove(f.file);
+                selected.Duplicates.Remove(f);
+
+                vm.FilesView.View.Refresh();
+            }*/
         }
 
         private void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e)
