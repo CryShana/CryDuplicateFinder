@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FolderBrowserEx" Version="1.0.1" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.5.1.20210123" />
+  </ItemGroup>
+
+</Project>
