@@ -143,6 +143,8 @@ namespace CryDuplicateFinder
 
         DateTime lastMouseDown = DateTime.Now;
         FileEntry.SimilarFileEntry lastItem = null;
+        FileEntry lastFile = null;
+
         void StackPanel_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var now = DateTime.Now;
@@ -161,6 +163,26 @@ namespace CryDuplicateFinder
             }
 
             lastItem = item;
+            lastMouseDown = now;
+        }
+        void StackPanel_MouseDown_1(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var now = DateTime.Now;
+            var elapsed = (now - lastMouseDown).TotalMilliseconds;
+            var file = (FileEntry)(sender as StackPanel).DataContext;
+
+            // detecting mouse double click
+            if (elapsed < 400 && lastFile == file)
+            {
+                var pinfo = new ProcessStartInfo
+                {
+                    FileName = file.Path,
+                    UseShellExecute = true
+                };
+                Process.Start(pinfo);
+            }
+
+            lastFile = file;
             lastMouseDown = now;
         }
 
@@ -322,6 +344,6 @@ namespace CryDuplicateFinder
             }
         }
 
-        void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();
+        void HideImagesWithoutDuplicates(object sender, RoutedEventArgs e) => vm.HideFilesWithoutDuplicates();     
     }
 }
