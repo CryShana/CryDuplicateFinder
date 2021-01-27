@@ -23,7 +23,7 @@
         <ListView ItemsSource="{Binding FilesView.View, Mode=OneWay}" SelectionChanged="ListView_SelectionChanged" Margin="10,73,4,38">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" MouseDown="StackPanel_MouseDown_1">
                         <TextBlock>
                             <Run Text="[" FontWeight="Bold" />
                             <Run Text="{Binding Progress, Mode=OneWay}" FontWeight="Bold" Foreground="{Binding ProgressColor, Mode=OneWay}" />
@@ -55,6 +55,14 @@
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Select" />
+                    <MenuItem Header="Delete" />
+                    <MenuItem Header="Show in folder" />
+                    <MenuItem Header="Exclude from similar images" />
+                </ContextMenu>
+            </ListView.ContextMenu>
         </ListView>
 
         <Canvas Width="149" Height="195" Margin="0,73,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Background="#FFE8E8E8">
