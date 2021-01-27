@@ -4,6 +4,7 @@ using FolderBrowserEx;
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Timers;
@@ -131,7 +132,7 @@ namespace CryDuplicateFinder
 
         private void DeleteLocalSimilarImages(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show($"This will delete all similar images to '{vm.SelectedFile.Path}' that have similarity below {vm.MinSimilarity}%\n\n" +
+            if (MessageBox.Show($"This will delete all similar images to '{Path.GetFileName(vm.SelectedFile.Path)}' that have similarity below {vm.MinSimilarity}%\n\n" +
                 $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
             // TODO: delete local images
