@@ -15,7 +15,6 @@ namespace CryDuplicateFinder
     public partial class MainWindow : Window
     {
         ViewModel vm;
-        SynchronizationContext context;
         System.Timers.Timer speedtimer = new(300);
 
         public MainWindow()
