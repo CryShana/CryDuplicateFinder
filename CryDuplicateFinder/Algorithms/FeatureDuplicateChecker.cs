@@ -19,7 +19,17 @@ namespace CryDuplicateFinder.Algorithms
             var isCached = cache.TryGetValue(image, out Mat descriptors2);
 
             using var descriptors = new Mat();
-            using (var orb = ORB.Create())
+            using (var orb = ORB.Create(
+                nFeatures: 640,
+                scaleFactor: 1.2f,
+                nLevels: 8,
+                edgeThreshold: 31,
+                firstLevel: 0,
+                wtaK: 2,
+                scoreType: ORBScoreType.Harris,
+                patchSize: 31,
+                fastThreshold: 20)
+            )
             {
                 orb.DetectAndCompute(img, null, out KeyPoint[] imgKeypoints, descriptors);
 
