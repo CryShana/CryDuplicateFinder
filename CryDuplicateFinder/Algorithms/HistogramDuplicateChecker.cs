@@ -43,7 +43,8 @@ namespace CryDuplicateFinder.Algorithms
 
         (int[] b, int[] g, int[] r) GetHistogramGroups(Mat m, int groupCount)
         {
-            var indexer = m.GetGenericIndexer<Vec3b>();
+            using var mat3 = new Mat<Vec3b>(m);
+            var indexer = mat3.GetIndexer();
 
             // histogram color groups
             var br = new int[groupCount];
