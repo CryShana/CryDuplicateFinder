@@ -7,7 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Windows;
-using static CryDuplicateFinder.DuplicateChecker;
+using CryDuplicateFinder.Algorithms;
 
 namespace CryDuplicateFinder
 {
@@ -76,7 +76,8 @@ namespace CryDuplicateFinder
                         Status = $"[{ProgressValue + 1}/{ProgressMax}] Finding duplicates for '{fname}'";
 
                         await FindDuplicates(f, mode);
-                        await Task.Delay(5);
+
+                        //await Task.Delay(5);
                     }
                     catch (Exception ex)
                     {
