@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CryDuplicateFinder"
         mc:Ignorable="d" DataContext="{StaticResource viewModel}"
-        Title="CryDuplicateFinder" Height="550" Width="1000" MinWidth="900" MinHeight="450">
+        Title="CryDuplicateFinder" Height="600" Width="1000" MinWidth="900" MinHeight="600">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="37*"/>
@@ -82,12 +82,13 @@
         <Button Click="DeleteLocalSimilarImages" IsEnabled="{Binding CanDeleteLocal, Mode=OneWay}" Content="Delete similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,331,10,0" VerticalAlignment="Top" Width="151" Height="20"/>
         <TextBox Grid.Column="1" HorizontalAlignment="Right" IsTabStop="False" Margin="0,308,10,0" Text="{Binding MinSimilarity, Mode=TwoWay}" TextWrapping="Wrap" VerticalAlignment="Top" Width="44" Height="18"/>
         <TextBlock Grid.Column="1" HorizontalAlignment="Right" Margin="0,309,59,0" Text="Min. similarity:" TextWrapping="Wrap" VerticalAlignment="Top" Height="16" Width="95"/>
-        <Button Click="DeleteGlobalSimilarImages" IsEnabled="{Binding CanDeleteGlobal, Mode=OneWay}" Content="Delete all similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="151" Height="20"/>
+        <Button Click="DeleteGlobalSimilarImages" IsEnabled="{Binding CanDeleteGlobal, Mode=OneWay}" Content="Delete all similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,0,10,45" VerticalAlignment="Bottom" Width="151" Height="20"/>
         <Button Click="HideImagesWithoutDuplicates" IsEnabled="{Binding CanHide, Mode=OneWay}" Content="Hide images without duplicates" Margin="10,0,0,13" VerticalAlignment="Bottom" Height="20" HorizontalAlignment="Left" Width="195"/>
         <TextBox Grid.Column="1" HorizontalAlignment="Right" IsTabStop="False" Margin="0,12,194,0" Text="{Binding MaxThreads, Mode=TwoWay}" TextWrapping="Wrap" VerticalAlignment="Top" Width="44" Height="18"/>
         <TextBlock Grid.Column="1" HorizontalAlignment="Right" Margin="0,13,242,0" Text="Max. threads:" TextWrapping="Wrap" VerticalAlignment="Top" Height="16" Width="85"/>
         <TextBlock Grid.Column="1" HorizontalAlignment="Right" Margin="0,271,10,0" Text="{Binding SelectedFile.Resolution, Mode=OneWay}" TextAlignment="Right" TextWrapping="Wrap" VerticalAlignment="Top" Width="151" Height="16"/>
-        <Button Click="MoveGlobalSimilarImages" IsEnabled="{Binding CanDeleteGlobal, Mode=OneWay}" Content="Move all similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" Width="151" Height="20"/>
+        <Button Click="MoveGlobalSimilarImages" IsEnabled="{Binding CanDeleteGlobal, Mode=OneWay}" Content="Move all similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,0,10,70" VerticalAlignment="Bottom" Width="151" Height="20"/>
         <TextBox x:Name="txtSearch" IsEnabled="{Binding CanHide, Mode=OneWay}" TextChanged="txtSearch_TextChanged" HorizontalAlignment="Right" Margin="0,0,4,13" Text="" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="112" Height="20"/>
+        <Button Click="ExportToJson" IsEnabled="{Binding CanDeleteGlobal, Mode=OneWay}" Content="Export to JSON" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="151" Height="20"/>
     </Grid>
 </Window>

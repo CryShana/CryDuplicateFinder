@@ -50,16 +50,20 @@ namespace CryDuplicateFinder
         public DateTime? StartedAnalysis { get; private set; }
         public DateTime? FinishedAnalysis { get; private set; }
 
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public string Resolution
         {
             get
             {
                 if (resolution == null)
                 {
-                    _ = getResolution();
-                    return "-";
+                    if (Width == 0 || Height == 0)
+                    {
+                        _ = getResolution();
+                        return "-";
+                    }
+                    else resolution = $"{Width}x{Height}";       
                 }
 
                 return resolution;
@@ -123,7 +127,7 @@ namespace CryDuplicateFinder
             return Task.Run(() =>
             {
                 var checker = GetDuplicateChecker(mode);
-                checker.LoadImage(Path);
+                checker.LoadImage(this);
 
                 var minSim = checker.GetMinRequiredSimilarity();
 
@@ -137,7 +141,10 @@ namespace CryDuplicateFinder
                         {
                             context.Post(d =>
                             {
-                                lock (padlock) filesChecked++;
+                                lock (padlock)
+                                {
+                                    if (filesChecked < FilesToCheck) filesChecked++;
+                                }
                             }, null);
                             return;
                         }
@@ -149,7 +156,7 @@ namespace CryDuplicateFinder
                         try
                         {
                             // get similarity
-                            similarity = checker.CalculateSimiliarityTo(f.Path);
+                            similarity = checker.CalculateSimiliarityTo(f);
                             isDuplicate = similarity >= minSim;
                         }
                         catch (Exception ex)
@@ -166,7 +173,10 @@ namespace CryDuplicateFinder
                                 if (token.IsCancellationRequested) return;
 
                                 if (isDuplicate) RegisterDuplicate(f, similarity, sw.Elapsed.TotalMilliseconds);
-                                lock (padlock) filesChecked++;
+                                lock (padlock)
+                                {
+                                    if (filesChecked < FilesToCheck) filesChecked++;
+                                }
                             }, null);
                         }
                     });
