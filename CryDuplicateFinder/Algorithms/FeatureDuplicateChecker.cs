@@ -105,6 +105,6 @@ namespace CryDuplicateFinder.Algorithms
             cache.Clear();
         }
 
-        public double GetMinRequiredSimilarity() => 0.5;
+        public double GetMinRequiredSimilarity() => 0.6;
     }
 }
