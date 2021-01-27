@@ -22,7 +22,7 @@ namespace CryDuplicateFinder.Algorithms
 
             // only compute if no value is cached
             using (var orb = ORB.Create(
-                nFeatures: 640,
+                nFeatures: 650,
                 scaleFactor: 1.2f,
                 nLevels: 8,
                 edgeThreshold: 31,
