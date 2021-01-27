@@ -11,6 +11,7 @@ using System.Threading;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace CryDuplicateFinder
 {
@@ -24,9 +25,28 @@ namespace CryDuplicateFinder
             InitializeComponent();
 
             vm = DataContext as ViewModel;
+            vm.SelectedFileChanged += Vm_SelectedFileChanged;
 
             speedtimer.Elapsed += Speedtimer_Elapsed;
             speedtimer.Start();
+        }
+
+        private void Vm_SelectedFileChanged(object sender, FileEntry e)
+        {
+            if (e == null)
+            {
+                selectedImage.Source = null;
+                return;
+            }
+
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new(e.Path);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+
+            selectedImage.Source = bitmap;
         }
 
         void Speedtimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -161,7 +181,7 @@ namespace CryDuplicateFinder
                 vm.Files.Remove(f.file);
                 selected.Duplicates.Remove(f);
 
-                vm.FilesView.View.Refresh();
+                vm.FilesView.View.Refresh(); // CHECK: for some reason this view needs to be refreshed manually - but the SelectedFiles view does it automatically
             }
         }
 

@@ -57,12 +57,10 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Image Grid.Column="1" RenderOptions.BitmapScalingMode="HighQuality" Source="{Binding SelectedFileImage, Mode=OneWay}"
-               Width="149" Height="195" Margin="0,73,10,0" VerticalAlignment="Top" HorizontalAlignment="Right">
-            <!--<Image.Source>
-                <BitmapImage UriSource="{Binding SelectedFileImage, Mode=OneWay}" DecodePixelWidth="250" CacheOption="OnLoad" />
-            </Image.Source>-->
-        </Image>
+        <Canvas Width="149" Height="195" Margin="0,73,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="1" Background="#FFE8E8E8">
+            <Image x:Name="selectedImage" RenderOptions.BitmapScalingMode="HighQuality" Width="149" Height="195" />
+        </Canvas>
+        
 
         <TextBlock Grid.Column="1" Margin="0,52,10,0" Text="{Binding SpeedStatus, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="287" Foreground="#FF2C94DC"/>
         <Button Click="DeleteLocalSimilarImages" IsEnabled="{Binding CanDeleteLocal, Mode=OneWay}" Content="Delete similar images" Grid.Column="1" IsTabStop="False" HorizontalAlignment="Right" Margin="0,331,10,0" VerticalAlignment="Top" Width="151" Height="20"/>

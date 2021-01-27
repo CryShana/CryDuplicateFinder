@@ -109,15 +109,16 @@ namespace CryDuplicateFinder
                 selectedFile = value;
                 Changed();
                 Changed(nameof(CanDeleteLocal));
-                Changed(nameof(SelectedFileImage));
+                SelectedFileChanged?.Invoke(this, selectedFile);
             }
         }
-        public string SelectedFileImage => SelectedFile?.Path ?? GetUriToTempImage();
         public bool CanDeleteLocal => SelectedFile != null && SelectedFile.FinishedAnalysis != null && !IsBusy;
         public bool CanDeleteGlobal => !IsBusy;
 
         public bool IsHiding { get => hiding; private set { hiding = value; Changed(); Changed(nameof(CanHide)); } }
         public bool CanHide => !IsHiding && ProgressValue > 1;
+
+        public event EventHandler<FileEntry> SelectedFileChanged;
 
         public ViewModel()
         {
@@ -263,27 +264,6 @@ namespace CryDuplicateFinder
             else FilesView.View.Refresh();
         }
 
-        const string tempImagePath = "empty.jpg";
-        string GetUriToTempImage()
-        {
-            // DIRTY WORKAROUND (Using BitmapImage in XML and it crashes if UriSource is NULL at any point in time)
-            // Here I create a temporary gray file to fill that emptiness (looks better anyway)
-
-            if (File.Exists(tempImagePath)) return new FileInfo(tempImagePath).FullName;
-
-            int w = 149, h = 195;
-
-            Bitmap Bmp = new Bitmap(w, h);
-            using (Graphics gfx = Graphics.FromImage(Bmp))
-            using (SolidBrush brush = new SolidBrush(System.Drawing.Color.LightGray))
-            {
-                gfx.FillRectangle(brush, 0, 0, w, h);
-            }
-            Bmp.Save(tempImagePath);
-
-            var info = new FileInfo(tempImagePath).FullName;
-            return info;
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         void Changed([CallerMemberName] string name = "")
