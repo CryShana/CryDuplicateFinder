@@ -65,7 +65,7 @@ namespace CryDuplicateFinder
             StartedAnalysis = DateTime.Now;
 
             // minimum similarity value to consider image as possible duplicate 
-            const double similarityThreshold = 0.61;
+            const double similarityThreshold = 0.5;
 
             filesToCheck = files.Count() - 1;
 
