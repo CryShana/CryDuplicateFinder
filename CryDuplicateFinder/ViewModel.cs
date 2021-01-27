@@ -51,6 +51,7 @@ namespace CryDuplicateFinder
             }
         }
         public CollectionViewSource FilesView { get => fview; set { fview = value; Changed(); } }
+        public string StartButtonText => IsBusy ? "Stop" : "Start";
 
         public double MinSimilarity
         {
@@ -70,12 +71,12 @@ namespace CryDuplicateFinder
             get => busy; set
             {
                 busy = value;
-                StartReady = !busy;
                 SelectionReady = !busy;
 
                 Changed();
                 Changed(nameof(StartReady));
                 Changed(nameof(SelectionReady));
+                Changed(nameof(StartButtonText));
             }
         }
 
@@ -91,14 +92,26 @@ namespace CryDuplicateFinder
 
         }
 
+        CancellationTokenSource csc = null;
         public async Task Start(DuplicateCheckingMode mode)
         {
+            if (csc != null)
+            {
+                csc.Cancel();
+                csc = null;
+                return;
+            }
+
+            csc = new();
             IsBusy = true;
             IsHiding = false;
             SelectedFile = null;
             Status = "Starting...";
+            
             try
             {
+                var token = csc.Token;
+
                 // give GUI time to catch up
                 await Task.Delay(10);
 
@@ -114,12 +127,14 @@ namespace CryDuplicateFinder
 
                 foreach (var f in Files)
                 {
+                    if (token.IsCancellationRequested) break;
+                    
                     try
                     {
                         var fname = Path.GetFileNameWithoutExtension(f.Path);
                         Status = $"[{ProgressValue + 1}/{ProgressMax}] Finding duplicates for '{fname}'";
 
-                        await FindDuplicates(f, mode);
+                        await FindDuplicates(f, mode, token);
 
                         // give GUI time to catch up
                         await Task.Delay(10);
@@ -187,10 +202,7 @@ namespace CryDuplicateFinder
             });
         }
 
-        Task FindDuplicates(FileEntry file, DuplicateCheckingMode mode)
-        {
-            return file.CheckForDuplicates(Files, mode);
-        }
+        Task FindDuplicates(FileEntry file, DuplicateCheckingMode mode, CancellationToken token) => file.CheckForDuplicates(Files, mode, token);
 
         public void HideFilesWithoutDuplicates()
         {

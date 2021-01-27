@@ -60,7 +60,7 @@ namespace CryDuplicateFinder
             DuplicatesView.SortDescriptions.Add(new SortDescription(nameof(SimilarFileEntry.similarity), ListSortDirection.Descending));
         }
 
-        public Task CheckForDuplicates(IEnumerable<FileEntry> files, DuplicateCheckingMode mode)
+        public Task CheckForDuplicates(IEnumerable<FileEntry> files, DuplicateCheckingMode mode, CancellationToken token)
         {
             StartedAnalysis = DateTime.Now;
 
@@ -89,7 +89,7 @@ namespace CryDuplicateFinder
             var context = SynchronizationContext.Current;
 
             return Task.Run(() =>
-            {
+            {  
                 var checker = GetDuplicateChecker(mode);
                 checker.LoadImage(Path);
 
@@ -98,7 +98,7 @@ namespace CryDuplicateFinder
                     Parallel.ForEach(files, f =>
                     {
                         // ignore same file or file already part of duplicates
-                        if (f == this) return;
+                        if (f == this || token.IsCancellationRequested) return;
                         if (Duplicates.Where(x => x.file == f).FirstOrDefault() != default)
                         {                           
                             context.Post(d =>
@@ -129,6 +129,8 @@ namespace CryDuplicateFinder
                             // then add to collection
                             context.Post(d =>
                             {
+                                if (token.IsCancellationRequested) return;
+
                                 if (isDuplicate) RegisterDuplicate(f, similarity, sw.Elapsed.TotalMilliseconds);
                                 lock (padlock) FilesChecked++;
                             }, null);
