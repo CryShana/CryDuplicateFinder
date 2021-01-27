@@ -1,7 +1,9 @@
 ﻿using OpenCvSharp;
+using OpenCvSharp.Flann;
 
-using System.Collections.Concurrent;
 using System.Linq;
+using System.Collections.Concurrent;
+
 
 namespace CryDuplicateFinder.Algorithms
 {
@@ -9,10 +11,10 @@ namespace CryDuplicateFinder.Algorithms
     {
         static int MaxCacheCapacity = 500_000;
         static ConcurrentDictionary<string, Mat> cache = new();
-        
+
         Mat img;
-        string original;  
-        const int MaxDimension = 300; 
+        string original;
+        const int MaxDimension = 300;
 
         public double CalculateSimiliarityTo(string image)
         {
@@ -39,7 +41,7 @@ namespace CryDuplicateFinder.Algorithms
                     orb.DetectAndCompute(img, null, out KeyPoint[] imgKeypoints, descriptors);
                     if (cache.Count < MaxCacheCapacity) cache.TryAdd(original, descriptors);
                 }
-                else descriptors = dstp;            
+                else descriptors = dstp;
 
                 // check if target image is cached
                 if (!isCached)
@@ -48,13 +50,12 @@ namespace CryDuplicateFinder.Algorithms
 
                     descriptors2 = new Mat();
                     orb.DetectAndCompute(img2, null, out KeyPoint[] imgKeypoints2, descriptors2);
-
-                    // cache it if there is space
                     if (cache.Count < MaxCacheCapacity) cache.TryAdd(image, descriptors2);
                 }
             }
 
             var matcher = new BFMatcher(NormTypes.Hamming, true);
+            //var matcher = new FlannBasedMatcher(new LshIndexParams(20, 10, 0), new SearchParams());
             var matches = matcher.Match(descriptors, descriptors2);
             var mean = matches.Average(x => x.Distance);
 
