@@ -12,7 +12,7 @@ namespace CryDuplicateFinder.Algorithms
 
         Mat img;
         string original;
-        const int MaxDimension = 250;
+        const int MaxDimension = 300;
 
         public double CalculateSimiliarityTo(string image)
         {
