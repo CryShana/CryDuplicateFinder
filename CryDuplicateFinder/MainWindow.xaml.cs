@@ -33,12 +33,18 @@ namespace CryDuplicateFinder
             const int lastFilesToCheck = 20;
 
             if (vm.IsBusy == false && vm.ProgressValue < vm.ProgressMax) vm.SpeedStatus = "Waiting to start";
-            else if (vm.IsBusy == false && vm.Files.Count > 1 && vm.ProgressMax == vm.ProgressMax)
+            else if (vm.IsBusy == false && vm.Files.Count > 1 && vm.ProgressValue == vm.ProgressMax)
             {
                 var first = vm.Files.First();
                 var last = vm.Files.Last();
                 var elapsed = (last.FinishedAnalysis - first.StartedAnalysis).Value.TotalMilliseconds;  
                 vm.SpeedStatus = $"Finished (Elapsed: {getTimeText(elapsed)})";
+            }
+            else if (vm.IsBusy && vm.Files.Count > 1 && vm.ProgressValue == 0)
+            {
+                // show progress on checked files
+                var first = vm.Files.First();
+                vm.SpeedStatus = $"Computing characteristics... ({first.FilesChecked}/{first.FilesToCheck})";
             }
             else
             {

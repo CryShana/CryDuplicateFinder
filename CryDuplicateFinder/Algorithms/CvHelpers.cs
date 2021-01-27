@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 
 using System;
+using System.IO;
 
 namespace CryDuplicateFinder.Algorithms
 {
@@ -21,6 +22,12 @@ namespace CryDuplicateFinder.Algorithms
             }
 
             if (Math.Max(src.Width, src.Height) > maxDimension) Cv2.Resize(src, to, new(width, height));
+        }
+
+        public static Mat OpenImage(string path, ImreadModes mode = ImreadModes.Color)
+        {
+            var fstream = File.OpenRead(path);
+            return Mat.FromStream(fstream, mode);
         }
     }
 }

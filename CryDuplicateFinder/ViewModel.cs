@@ -78,10 +78,22 @@ namespace CryDuplicateFinder
         public async Task Start(DuplicateCheckingMode mode)
         {
             IsBusy = true;
+            SelectedFile = null;
+            Status = "Starting...";
             try
             {
+                // give GUI time to catch up
+                await Task.Delay(10);
+
                 Status = "Getting files...";
                 await AnalyzeDirectory();
+
+                // reset all cache in checkers
+                HistogramDuplicateChecker.ClearCache();
+                FeatureDuplicateChecker.ClearCache();
+
+                // give GUI time to catch up
+                await Task.Delay(10);
 
                 foreach (var f in Files)
                 {
@@ -92,7 +104,8 @@ namespace CryDuplicateFinder
 
                         await FindDuplicates(f, mode);
 
-                        //await Task.Delay(5);
+                        // give GUI time to catch up
+                        await Task.Delay(10);
                     }
                     catch (Exception ex)
                     {

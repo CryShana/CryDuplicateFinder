@@ -20,8 +20,7 @@ namespace CryDuplicateFinder.Algorithms
 
     public enum DuplicateCheckingMode
     {
-        Fast,
-        Slow,
-        Slowest
+        Histogram,
+        Features
     }
 }

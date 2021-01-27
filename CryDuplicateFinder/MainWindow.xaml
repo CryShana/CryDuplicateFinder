@@ -12,13 +12,13 @@
             <ColumnDefinition Width="184*"/>
         </Grid.ColumnDefinitions>
         <Button x:Name="btnRootDir" IsEnabled="{Binding SelectionReady, Mode=OneWay}" Content="Select directory" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="129" Height="22" Click="btnRootDir_Click"/>
-        <TextBlock Margin="144,13,175,0" Text="{Binding RootDirectory, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <TextBlock Margin="144,13,190,0" Text="{Binding RootDirectory, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
         <ProgressBar Value="{Binding ProgressValue, Mode=OneWay}" Maximum="{Binding ProgressMax, Mode=OneWay}" Minimum="0" Height="10" Margin="10,37,10,0" VerticalAlignment="Top" Foreground="#FF29A6EE" Grid.ColumnSpan="2"/>
         <TextBlock Margin="10,52,302,0" Text="{Binding Status, Mode=OneWay}" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
         <Button x:Name="btnStart" Content="Start" IsEnabled="{Binding StartReady, Mode=OneWay}" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="78" Height="22" Click="btnStart_Click" Grid.Column="1"/>
-        <ComboBox x:Name="comboMode" SelectedIndex="0" IsEnabled="{Binding StartReady, Mode=OneWay}" HorizontalAlignment="Right" Margin="0,10,93,0" VerticalAlignment="Top" Width="72" IsReadOnly="True" Grid.Column="1">
-            <ComboBoxItem Content="Fast"/>
-            <ComboBoxItem Content="Slow"/>
+        <ComboBox x:Name="comboMode" SelectedIndex="1" IsEnabled="{Binding StartReady, Mode=OneWay}" HorizontalAlignment="Right" Margin="0,10,93,0" VerticalAlignment="Top" Width="92" IsReadOnly="True" Grid.Column="1">
+            <ComboBoxItem Content="Histogram"/>
+            <ComboBoxItem Content="Features"/>
         </ComboBox>
         <ListView ItemsSource="{Binding Files, Mode=OneWay}" SelectionChanged="ListView_SelectionChanged" Margin="10,73,4,10">
             <ListView.ItemTemplate>
