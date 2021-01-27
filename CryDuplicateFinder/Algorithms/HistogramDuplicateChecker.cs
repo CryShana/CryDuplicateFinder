@@ -10,11 +10,11 @@ namespace CryDuplicateFinder.Algorithms
     /// </summary>
     public class HistogramDuplicateChecker : IDuplicateChecker
     {
-        static int MaxCacheCapacity = 300_000;
+        static int MaxCacheCapacity = 500_000;
         static ConcurrentDictionary<string, (int[] r, int[] g, int[] b, int pixels)> cache = new();
 
         Mat img;
-        const int MaxDimension = 400;
+        const int MaxDimension = 300;
 
         public double CalculateSimiliarityTo(string image)
         {        
@@ -91,14 +91,11 @@ namespace CryDuplicateFinder.Algorithms
             return similarity;
         }
 
-        public void LoadImage(string image)
-        {
-            img = GetImage(image);
-        }
-
+        public void LoadImage(string image) => img = GetImage(image);
+        
         Mat GetImage(string image)
         {
-            var m = new Mat(image);
+            var m = CvHelpers.OpenImage(image, ImreadModes.Color);
             CvHelpers.Limit(m, m, MaxDimension);
             return m;
         }

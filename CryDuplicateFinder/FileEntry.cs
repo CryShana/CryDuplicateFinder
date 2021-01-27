@@ -65,7 +65,7 @@ namespace CryDuplicateFinder
             StartedAnalysis = DateTime.Now;
 
             // minimum similarity value to consider image as possible duplicate 
-            const double similarityThreshold = 0.5;
+            const double similarityThreshold = 0.66;
 
             filesToCheck = files.Count() - 1;
 
@@ -104,21 +104,30 @@ namespace CryDuplicateFinder
                         }
 
                         bool isDuplicate = false;
-
-                        // get similarity
+                        double similarity = 0.0;
                         var sw = Stopwatch.StartNew();
 
-                        var similarity = checker.CalculateSimiliarityTo(f.Path);
-                        isDuplicate = similarity >= similarityThreshold;
+                        try
+                        {
+                            // get similarity
+                            similarity = checker.CalculateSimiliarityTo(f.Path);
+                            isDuplicate = similarity >= similarityThreshold;                             
+                        }
+                        catch (Exception ex)
+                        {
+                            // TODO: maybe log
+                        }
+                        finally
+                        {
+                            sw.Stop();
 
-                        sw.Stop();
-
-                        // then add to collection
-                        context.Post(d =>
-                        {      
-                            if (isDuplicate) RegisterDuplicate(f, similarity, sw.Elapsed.TotalMilliseconds);                  
-                            lock (padlock) FilesChecked++;
-                        }, null);
+                            // then add to collection
+                            context.Post(d =>
+                            {
+                                if (isDuplicate) RegisterDuplicate(f, similarity, sw.Elapsed.TotalMilliseconds);
+                                lock (padlock) FilesChecked++;
+                            }, null);
+                        }
                     });
                 }
                 finally
@@ -131,9 +140,8 @@ namespace CryDuplicateFinder
 
         IDuplicateChecker GetDuplicateChecker(DuplicateCheckingMode mode) => mode switch
         {
-            DuplicateCheckingMode.Fast => new HistogramDuplicateChecker(),
-            DuplicateCheckingMode.Slow => new FeatureDuplicateChecker(),
-            DuplicateCheckingMode.Slowest => new TemplateDuplicateChecker(),
+            DuplicateCheckingMode.Histogram => new HistogramDuplicateChecker(),
+            DuplicateCheckingMode.Features => new FeatureDuplicateChecker(),
             _ => throw new NotImplementedException()
         };
 
