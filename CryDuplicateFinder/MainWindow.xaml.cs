@@ -22,7 +22,6 @@ namespace CryDuplicateFinder
             InitializeComponent();
 
             vm = DataContext as ViewModel;
-            context = SynchronizationContext.Current;
 
             speedtimer.Elapsed += Speedtimer_Elapsed;
             speedtimer.Start();
@@ -128,6 +127,23 @@ namespace CryDuplicateFinder
 
             lastItem = item;
             lastMouseDown = now;
+        }
+
+        private void DeleteLocalSimilarImages(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show($"This will delete all similar images to '{vm.SelectedFile.Path}' that have similarity below {vm.MinSimilarity}%\n\n" +
+                $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+
+            // TODO: delete local images
+        }
+
+        private void DeleteGlobalSimilarImages(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show($"This will delete all similar images to all files that have similarity below {vm.MinSimilarity}%. " +
+                $"Files with higher resolution will be prioritized.\n\n" +
+                $"Are you sure?", "Confirm deletion", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+
+            // TODO: delete global images (prioritize higher resolutions)
         }
     }
 }

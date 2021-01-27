@@ -19,6 +19,7 @@ namespace CryDuplicateFinder
         bool startReady = false, selectionReady = true, busy = false;
         string rootdir = null, status = null, speedStatus = null;
         int prgMax = 100, prgVal = 0;
+        double minSimilarity = 90;
 
         public string RootDirectory
         {
@@ -33,10 +34,21 @@ namespace CryDuplicateFinder
         }
 
         public int ProgressMax { get => prgMax; set { prgMax = value; Changed(); } }
-        public int ProgressValue { get => prgVal; set { prgVal = value; Changed(); } }
+        public int ProgressValue { get => prgVal; set { prgVal = value; Changed(); Changed(nameof(CanDeleteGlobal)); } }
         public string Status { get => status ?? "Idle"; set { status = value; Changed(); } }
         public string SpeedStatus { get => speedStatus ?? "Waiting to start"; set { speedStatus = value; Changed(); } }
         public ObservableCollection<FileEntry> Files { get => files; set { files = value; Changed(); } }
+
+        public double MinSimilarity
+        {
+            get => minSimilarity; set
+            {
+                minSimilarity = value;
+                if (minSimilarity > 100) minSimilarity = 100;
+                else if (minSimilarity < 0) minSimilarity = 0;
+                Changed();
+            }
+        }
 
         public bool StartReady { get => startReady; set { startReady = value; Changed(); } }
         public bool SelectionReady { get => selectionReady; set { selectionReady = value; Changed(); } }
@@ -54,7 +66,9 @@ namespace CryDuplicateFinder
             }
         }
 
-        public FileEntry SelectedFile { get => selectedFile; set { selectedFile = value; Changed(); } }
+        public FileEntry SelectedFile { get => selectedFile; set { selectedFile = value; Changed(); Changed(nameof(CanDeleteLocal)); } }
+        public bool CanDeleteLocal => SelectedFile != null && SelectedFile.FinishedAnalysis != null;
+        public bool CanDeleteGlobal => ProgressValue == ProgressMax;
 
         public ViewModel()
         {
