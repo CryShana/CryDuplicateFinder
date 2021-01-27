@@ -98,7 +98,12 @@ namespace CryDuplicateFinder
 
         public ViewModel()
         {
+            DetermineThreadCount();
+        }
 
+        void DetermineThreadCount()
+        {
+            MaxThreads = Environment.ProcessorCount;
         }
 
         CancellationTokenSource csc = null;
